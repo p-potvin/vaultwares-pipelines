@@ -1,0 +1,2 @@
+# VaultWares Git Submodule Manifest
+# Pattern: [Target Folder] [GitHub HTTPS URL] [Branch/Tag]
