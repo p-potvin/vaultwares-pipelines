@@ -5,7 +5,7 @@ Gradio interface for creating 3D environments from real-life videos.
 - Integrates with modular agent architecture
 """
 import gradio as gr
-from smolvlm2_wrapper.image.image_to_3d import image_to_3d_main  # Placeholder for actual 3D pipeline
+from smolvlm2_wrapper.image.image_to_3d import image_to_3d  # Actual function name
 
 # Placeholder: video-to-3d pipeline (to be implemented)
 def video_to_3d(video_path):

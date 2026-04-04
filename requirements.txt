@@ -25,3 +25,5 @@ opencv-python>=4.8.0
 
 # ---- performance & memory management (optional) ----
 psutil>=5.9.0          # memory_info() in DeviceManager
+
+ipython==9.12.0                # for rich progress bars and debugging

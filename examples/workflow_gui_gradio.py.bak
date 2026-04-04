@@ -116,7 +116,7 @@ def gradio_app():
         gr.Markdown("# Multi-Agent Workflow GUI with Resource Monitor")
         with gr.Row():
             with gr.Column(scale=2):
-                input("Gradio app starting...")
+                print("Gradio app starting...")
                 workflow_sel = gr.Dropdown(list(WORKFLOWS.keys()), label="Select Workflow", value=list(WORKFLOWS.keys())[0])
                 param_elems = {}
                 param_box = gr.Column()
