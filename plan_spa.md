@@ -1,5 +1,18 @@
 # Advanced Workflow SPA/Web App Plan
 
+---
+
+## [2024-04-04 22:23 UTC] Progress Log
+
+- Added Git submodule vault-themes to frontend/ (https://github.com/p-potvin/vault-themes)
+- Reviewed vault-themes for available styles/themes (no direct CSS/SCSS, but design tokens and principles documented)
+- Extended Tailwind config with custom theme variables based on vault-themes/README.md and STYLE.md
+- Refactored WorkflowList and App components to use new theme classes (e.g., bg-vault-bg, text-vault-text, etc.)
+- Installed/updated Tailwind and PostCSS dependencies for build
+- Ran build to verify integration (build succeeded, theme classes available)
+- Committed all changes to feat-spa-codingagent1
+
+
 ## Features
 - Browse workflows by category
 - Sort/filter workflows
