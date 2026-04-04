@@ -1,0 +1,3 @@
+[submodule "frontend/vault-themes"]
+	path = frontend/vault-themes
+	url = https://github.com/p-potvin/vault-themes

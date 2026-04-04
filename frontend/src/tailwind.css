@@ -1,3 +1,5 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import '../vault-themes/README.md'; /* Placeholder for theme info, real CSS/SCSS not present */

@@ -16,12 +16,37 @@ def video_to_3d(video_file, log_callback):
     return mesh_path, status
 
 def launch_3d_env_gradio():
+    import threading
+    import time
+    from smolvlm2_wrapper.redis_coordination import RedisCoordinator
+    import gradio as gr
+
+    redis_messages = []
+    redis_lock = threading.Lock()
+    coordinator = RedisCoordinator(agent_id='gradio-viewer')
+    def on_redis_message(msg):
+        with redis_lock:
+            redis_messages.append(msg)
+            # Keep only last 100 messages
+            if len(redis_messages) > 100:
+                redis_messages.pop(0)
+    coordinator.listen(on_redis_message)
+
+    def get_redis_messages():
+        with redis_lock:
+            return '\n'.join([str(m) for m in redis_messages])
+
     with gr.Blocks() as demo:
         gr.Markdown("# 3D Environment from Video")
         video_input = gr.Video(label="Upload Video")
         mesh_output = gr.File(label="3D Mesh Output (.obj)")
         log_output = gr.Textbox(label="Logs", lines=8)
         run_btn = gr.Button("Generate 3D Environment")
+
+        gr.Markdown("## Redis Message Viewer")
+        redis_box = gr.Textbox(label="Redis Messages", lines=12, interactive=False)
+        refresh_btn = gr.Button("Refresh Redis Messages")
+        refresh_btn.click(lambda: get_redis_messages(), outputs=redis_box)
 
         def process(video):
             logs = []
