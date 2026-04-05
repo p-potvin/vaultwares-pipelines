@@ -1,0 +1,1 @@
+CodingAgent-1: Claimed SPA implementation (API/backend, frontend, NIM/cloud, docs) on branch feat/spa-codingagent1
