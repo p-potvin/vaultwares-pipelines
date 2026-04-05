@@ -37,12 +37,19 @@
 ---
 
 ### 2. Frontend Implementation (React, Vite, Redux, Tailwind, zod)
+- [ ] Connect to local Redis server as Extrovert agent (heartbeat, status, todo sync)
+  - [ ] Use RedisCoordinator for all messaging
+  - [ ] Send heartbeat every 5s
+  - [ ] Sync todo/plan files on every answer
 - 2.1. UI/UX Design
   - [x] Review VaultWares guidelines/standards
   - [x] Review current frontend structure (React, Vite, Tailwind, WorkflowList)
   - [x] Confirm theming will use pre-existing vault-themes
   - [x] Wireframes for main views: category sidebar, workflow list, modals (create/import/export/restore)
-  - [ ] Implement category sidebar, workflow list, modals (create/import/export/restore) using vault-themes
+  - [x] Implement category sidebar, workflow list, modals (create/import/export/restore) using vault-themes
+  - [ ] Category sidebar
+  - [ ] Workflow list (sortable, filterable)
+  - [ ] Modals for create/import/export/restore
   - [ ] Design system: Tailwind setup, component library (Material UI/Ant Design)
 - 2.2. State Management
   - [ ] Redux store for workflows, categories, UI state (pins, favorites, filters)
