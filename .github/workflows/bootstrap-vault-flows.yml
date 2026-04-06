@@ -23,6 +23,8 @@ on:
 jobs:
   bootstrap:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout vaultwares-pipelines
         uses: actions/checkout@v4
