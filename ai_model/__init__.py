@@ -1,25 +1,25 @@
 """
-SmolVLM2 Wrapper – multi-modal manipulation toolkit
+AIModel Wrapper – multi-modal manipulation toolkit
 ====================================================
 
 Top-level exports for the most commonly used classes and helpers so that
 callers only need a single import::
 
-    from smolvlm2_wrapper import SmolVLM2Wrapper, ImageProcessor, VideoProcessor, TextProcessor
+    from ai_model import AIModel, ImageProcessor, VideoProcessor, TextProcessor
 
 See README.md for full usage examples and workflow documentation.
 """
 
-from smolvlm2_wrapper.core.model import BaseModelWrapper
-from smolvlm2_wrapper.core.smolvlm2 import GenericTextModelWrapper
-from smolvlm2_wrapper.image.processor import ImageProcessor
-from smolvlm2_wrapper.video.processor import VideoProcessor
-from smolvlm2_wrapper.text.processor import TextProcessor
-from smolvlm2_wrapper.workflows.base import Workflow
-from smolvlm2_wrapper.utils.device import DeviceManager
-from smolvlm2_wrapper.context_schema import ImageContext, VideoContext, TextContext, WorkflowContext
-from smolvlm2_wrapper.agent_registry import AgentRegistry
-from smolvlm2_wrapper.event_bus import EventBus
+from ai_model.core.model import BaseModelWrapper
+from ai_model.core.text_model import TextModelWrapper
+from ai_model.image.processor import ImageProcessor
+from ai_model.video.processor import VideoProcessor
+from ai_model.text.processor import TextProcessor
+from ai_model.workflows.base import Workflow
+from ai_model.utils.device import DeviceManager
+from ai_model.context_schema import ImageContext, VideoContext, TextContext, WorkflowContext
+from ai_model.agent_registry import AgentRegistry
+from ai_model.event_bus import EventBus
 
 # Register core agents for discovery
 AgentRegistry.register(
@@ -40,7 +40,7 @@ __version__ = "0.1.0"
 
 __all__ = [
     "BaseModelWrapper",
-    "GenericTextModelWrapper",
+    "TextModelWrapper",
     "ImageProcessor",
     "VideoProcessor",
     "TextProcessor",

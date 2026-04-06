@@ -2,7 +2,7 @@ import tempfile
 import os
 import cv2
 import numpy as np
-from smolvlm2_wrapper.nim_cosmos_api import NIMCosmosClient
+from ai_model.nim_cosmos_api import NIMCosmosClient
 import trimesh
 
 def extract_frames(video_path, max_frames=32):

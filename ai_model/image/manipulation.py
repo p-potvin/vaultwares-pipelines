@@ -60,7 +60,7 @@ def resize(
 
     Example::
 
-        from smolvlm2_wrapper.image.manipulation import resize
+        from ai_model.image.manipulation import resize
         small = resize(img, 320, 240)
     """
     return image.resize((width, height), resample=resample)

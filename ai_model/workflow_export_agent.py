@@ -3,13 +3,13 @@ Workflow agent for exporting Python-based workflows to ComfyUI/Diffusion formats
 Handles validation, compliance, and event publishing.
 """
 from typing import Any, Dict
-from smolvlm2_wrapper.shared_context import SharedContext
-from smolvlm2_wrapper.validation_utils import ValidationUtils
-from smolvlm2_wrapper.event_bus import EventBus
+from ai_model.shared_context import SharedContext
+from ai_model.validation_utils import ValidationUtils
+from ai_model.event_bus import EventBus
 
 import random
 import string
-from smolvlm2_wrapper.redis_coordination import RedisCoordinator
+from ai_model.redis_coordination import RedisCoordinator
 
 class WorkflowExportAgent:
     def __init__(self, shared_context: SharedContext):

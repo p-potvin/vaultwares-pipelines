@@ -2,8 +2,8 @@
 """
 Generic text model wrapper for HuggingFace-compatible models (multi-modal or text-only).
 
-This module provides :class:`GenericTextModelWrapper`, a concrete implementation of
-:class:`~smolvlm2_wrapper.core.model.BaseModelWrapper` that integrates any HuggingFace-compatible
+This module provides :class:`TextModelWrapper`, a concrete implementation of
+:class:`~ai_model.core.model.BaseModelWrapper` that integrates any HuggingFace-compatible
 text generation model for multi-modal or text-only inference.
 
 Supports:
@@ -13,16 +13,16 @@ Supports:
 
 Example – image captioning::
 
-    from smolvlm2_wrapper import GenericTextModelWrapper
+    from ai_model import TextModelWrapper
     from PIL import Image
 
-    model = GenericTextModelWrapper(model_id="HuggingFaceTB/SmolVLM2-500M-Video-Instruct")
+    model = TextModelWrapper(model_id="HuggingFaceTB/AIModel-500M-Video-Instruct")
     caption = model.caption(Image.open("photo.jpg"))
     print(caption)
 
 Example – text generation::
 
-    model = GenericTextModelWrapper(model_id="gpt2")
+    model = TextModelWrapper(model_id="gpt2")
     text = model.generate("Write a poem about the sea.")
     print(text)
 """
@@ -35,8 +35,8 @@ from typing import Any, List, Optional, Union
 from PIL import Image
 
 
-from smolvlm2_wrapper.core.config import ModelConfig
-from smolvlm2_wrapper.core.model import BaseModelWrapper
+from ai_model.core.config import ModelConfig
+from ai_model.core.model import BaseModelWrapper
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ _DEFAULT_MODEL_ID = "gpt2"
 
 
 
-class GenericTextModelWrapper(BaseModelWrapper):
+class TextModelWrapper(BaseModelWrapper):
     """Generic wrapper for any HuggingFace-compatible text generation model.
 
     Parameters
@@ -257,7 +257,7 @@ class GenericTextModelWrapper(BaseModelWrapper):
 
         Example::
 
-            from smolvlm2_wrapper.video.utils import sample_frames
+            from ai_model.video.utils import sample_frames
             frames = sample_frames("clip.mp4", n=8)
             desc = wrapper.describe_video(frames)
         """
@@ -305,7 +305,7 @@ class GenericTextModelWrapper(BaseModelWrapper):
         video_path: str,
         max_frames: int = 8,
     ) -> List[Image.Image]:
-        """Convenience shim – delegates to :func:`smolvlm2_wrapper.video.utils.sample_frames`.
+        """Convenience shim – delegates to :func:`ai_model.video.utils.sample_frames`.
 
         Parameters
         ----------
@@ -319,5 +319,5 @@ class GenericTextModelWrapper(BaseModelWrapper):
         List[PIL.Image.Image]
             Evenly-sampled frames.
         """
-        from smolvlm2_wrapper.video.utils import sample_frames
+        from ai_model.video.utils import sample_frames
         return sample_frames(video_path, n=max_frames)

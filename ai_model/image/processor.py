@@ -4,7 +4,7 @@ a single, chainable, model-aware interface.
 
 Usage (standalone – no ML model)::
 
-    from smolvlm2_wrapper.image.processor import ImageProcessor
+    from ai_model.image.processor import ImageProcessor
     from PIL import Image
 
     proc = ImageProcessor()
@@ -17,9 +17,9 @@ Usage (standalone – no ML model)::
 
 Usage (with SmolVLM2 for captioning / guided inpainting)::
 
-    from smolvlm2_wrapper import SmolVLM2Wrapper, ImageProcessor
+    from ai_model import AIModel, ImageProcessor
 
-    model = SmolVLM2Wrapper()
+    model = AIModel()
     proc  = ImageProcessor(model=model)
     caption = proc.load("photo.jpg").caption()
 """
@@ -34,7 +34,7 @@ from typing import Any, Optional, Tuple, Union
 
 from PIL import Image
 
-from smolvlm2_wrapper.image import manipulation, mask as mask_mod, inpaint as inpaint_mod
+from ai_model.image import manipulation, mask as mask_mod, inpaint as inpaint_mod
 import importlib
 ExtrovertAgent = importlib.import_module('vaultwares-agentciation.extrovert_agent').ExtrovertAgent
 AgentStatus = importlib.import_module('vaultwares-agentciation.enums').AgentStatus
@@ -48,7 +48,7 @@ class ImageProcessor(ExtrovertAgent):
     Parameters
     ----------
     model:
-        Optional :class:`~smolvlm2_wrapper.core.model.BaseModelWrapper`
+        Optional :class:`~ai_model.core.model.BaseModelWrapper`
         instance.  When provided, methods such as :meth:`caption` and
         :meth:`guided_inpaint` delegate to the model.
     """
@@ -79,7 +79,7 @@ class ImageProcessor(ExtrovertAgent):
         ImageProcessor
             Self (for chaining).
         """
-        from smolvlm2_wrapper.utils.io import load_image
+        from ai_model.utils.io import load_image
         self._image = load_image(source)
         return self
 
@@ -124,7 +124,7 @@ class ImageProcessor(ExtrovertAgent):
         pathlib.Path
             Absolute path to saved file.
         """
-        from smolvlm2_wrapper.utils.io import save_image
+        from ai_model.utils.io import save_image
         return save_image(self.get_image(), dest)
 
     def clone(self) -> "ImageProcessor":
@@ -301,7 +301,7 @@ class ImageProcessor(ExtrovertAgent):
 
         Example::
 
-            from smolvlm2_wrapper.image.mask import create_rect_mask
+            from ai_model.image.mask import create_rect_mask
             mask = create_rect_mask(w, h, (100, 100, 300, 300))
             proc.load("photo.jpg").apply_mask(mask).save("masked.jpg")
         """
@@ -374,14 +374,14 @@ class ImageProcessor(ExtrovertAgent):
         self.update_status(AgentStatus.WORKING)
         if self._model is None:
             self.update_status(AgentStatus.WAITING_FOR_INPUT)
-            raise RuntimeError("No model attached.  Pass model=SmolVLM2Wrapper() to ImageProcessor.")
+            raise RuntimeError("No model attached.  Pass model=AIModel() to ImageProcessor.")
         
         # Check if the model has a generic generate or an image-specific caption method
         try:
             if hasattr(self._model, 'caption'):
                 res = self._model.caption(self.get_image(), style=style)
             else:
-                from smolvlm2_wrapper.text.prompts import build_caption_prompt
+                from ai_model.text.prompts import build_caption_prompt
                 prompt = build_caption_prompt(style)
                 res = self._model.generate(prompt, images=[self.get_image()])
         finally:
@@ -393,7 +393,7 @@ class ImageProcessor(ExtrovertAgent):
         self.update_status(AgentStatus.WORKING)
         if self._model is None:
             self.update_status(AgentStatus.WAITING_FOR_INPUT)
-            raise RuntimeError("No model attached.  Pass model=SmolVLM2Wrapper() to ImageProcessor.")
+            raise RuntimeError("No model attached.  Pass model=AIModel() to ImageProcessor.")
         
         try:
             if hasattr(self._model, 'vqa'):

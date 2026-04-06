@@ -14,11 +14,11 @@ export default function LoRATraining() {
   // Params state
   const [params, setParams] = useState({
     learningRate: 1e-4,
-    batchSize: 4,
-    epochs: 10,
+    batchSize: 1,
+    epochs: 25,
     resolution: 512,
-    networkRank: 4,
-    alpha: 1.0,
+    networkRank: 32,
+    alpha: 32.0,
     dropout: 0.0,
   });
   // Training state
