@@ -57,7 +57,7 @@ export default function LoRATraining() {
         {steps.map((s, i) => (
           <button
             key={s}
-            className={`px-3 py-1 rounded ${i === step ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+            className={`px-3 py-1 rounded ${i === step ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
             onClick={() => setStep(i)}
           >
             {s}

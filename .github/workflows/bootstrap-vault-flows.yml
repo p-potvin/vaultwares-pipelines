@@ -14,11 +14,11 @@ on:
       api_url:
         description: 'Deployed backend API URL (e.g. https://api.example.com)'
         required: false
-        default: ''
+        default: 'http://127.0.0.1:7860'
       owner:
         description: 'GitHub owner (user or org) for the vault-flows repo (defaults to this repo owner)'
         required: false
-        default: ''
+        default: 'p-potvin'
 
 jobs:
   bootstrap:
@@ -79,74 +79,74 @@ jobs:
 
           # Write .gitignore
           cat > /tmp/vault-flows/.gitignore << 'GITIGNORE_EOF'
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+          # Logs
+          logs
+          *.log
+          npm-debug.log*
+          yarn-debug.log*
+          yarn-error.log*
+          pnpm-debug.log*
+          lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+          node_modules
+          dist
+          dist-ssr
+          *.local
 
-# Environment files
-.env
-.env.*
-!.env.example
+          # Environment files
+          .env
+          .env.*
+          !.env.example
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-GITIGNORE_EOF
+          # Editor directories and files
+          .vscode/*
+          !.vscode/extensions.json
+          .idea
+          .DS_Store
+          *.suo
+          *.ntvs*
+          *.njsproj
+          *.sln
+          *.sw?
+          GITIGNORE_EOF
 
           # Write README
           REPO="${{ github.repository }}"
           OWNER_VAL="${{ steps.owner.outputs.value }}"
           cat > /tmp/vault-flows/README.md << README_EOF
-# VaultFlows
+          # VaultFlows
 
-VaultFlows is the React frontend for the [vaultwares-pipelines](https://github.com/${REPO}) backend API.
+          VaultFlows is the React frontend for the [vaultwares-pipelines](https://github.com/${REPO}) backend API.
 
-## Development
+          ## Development
 
-\`\`\`bash
-npm install
-cp .env.example .env   # configure VITE_API_URL if needed
-npm run dev
-\`\`\`
+          \`\`\`bash
+          npm install
+          cp .env.example .env   # configure VITE_API_URL if needed
+          npm run dev
+          \`\`\`
 
-The dev server proxies \`/api/*\` requests to \`http://localhost:8000\` by default (configurable via \`VITE_API_URL\` in \`.env\`).
+          The dev server proxies \`/api/*\` requests to \`http://localhost:8000\` by default (configurable via \`VITE_API_URL\` in \`.env\`).
 
-## Production Build
+          ## Production Build
 
-\`\`\`bash
-VITE_API_URL=https://your-api-host npm run build
-\`\`\`
+          \`\`\`bash
+          VITE_API_URL=https://your-api-host npm run build
+          \`\`\`
 
-## Deployment
+          ## Deployment
 
-Deployed to **GitHub Pages** via the CI workflow in \`.github/workflows/deploy.yml\`.
+          Deployed to **GitHub Pages** via the CI workflow in \`.github/workflows/deploy.yml\`.
 
-Set the \`VITE_API_URL\` repository variable in GitHub (**Settings → Variables → Actions**) to point to the deployed backend API URL, then re-run the workflow.
+          Set the \`VITE_API_URL\` repository variable in GitHub (**Settings → Variables → Actions**) to point to the deployed backend API URL, then re-run the workflow.
 
-## E2E Tests
+          ## E2E Tests
 
-\`\`\`bash
-npx playwright install --with-deps
-npm run test:e2e
-\`\`\`
-README_EOF
+          \`\`\`bash
+          npx playwright install --with-deps
+          npm run test:e2e
+          \`\`\`
+          README_EOF
 
       - name: Verify build
         working-directory: /tmp/vault-flows
