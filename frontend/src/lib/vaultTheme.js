@@ -20,10 +20,10 @@ export function ThemeProvider({ children }) {
     document.documentElement.setAttribute('data-theme-mode', theme.mode);
   }, [theme, themeIndex]);
 
-  return (
-    <ThemeContext.Provider value={{ theme, themeIndex, setThemeIndex, themes }}>
-      {children}
-    </ThemeContext.Provider>
+  return React.createElement(
+    ThemeContext.Provider,
+    { value: { theme, themeIndex, setThemeIndex, themes } },
+    children
   );
 }
 

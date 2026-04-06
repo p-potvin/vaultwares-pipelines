@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 import os
 import json
@@ -12,6 +13,20 @@ AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "1") == "1"
 DEFAULT_MODELS_DIR = os.environ.get("DEFAULT_MODELS_DIR", r"D:/comfyui/resources/comfyui/models/")
 
 app = FastAPI(title="Vaultwares Workflow API", description="API for managing workflows, favorites, backup, NIM integration, and storage.", version="0.2.0")
+
+# --- CORS ---
+CORS_ORIGINS = os.environ.get(
+    "CORS_ORIGINS",
+    "http://localhost:5173,http://localhost:4173"
+).split(",")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 security = HTTPBasic()
 
