@@ -5,9 +5,9 @@ Gradio interface for creating 3D environments from real-life videos.
 - Integrates with modular agent architecture
 """
 import gradio as gr
-from smolvlm2_wrapper.image.image_to_3d import image_to_3d  # Actual function name
+from ai_model.image.image_to_3d import image_to_3d  # Actual function name
 
-from smolvlm2_wrapper.cosmos_3d_env_workflow import cosmos_3d_env_run
+from ai_model.cosmos_3d_env_workflow import cosmos_3d_env_run
 import io
 
 def video_to_3d(video_file, log_callback):

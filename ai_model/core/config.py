@@ -3,7 +3,7 @@ Configuration management for model wrappers.
 
 Usage::
 
-    from smolvlm2_wrapper.core.config import ModelConfig
+    from ai_model.core.config import ModelConfig
 
     cfg = ModelConfig(
         model_id="HuggingFaceTB/SmolVLM2-500M-Video-Instruct",

@@ -5,7 +5,7 @@ Generate a 3D mesh (with textures) from a single image.
 ## Usage
 
 ```bash
-python -m smolvlm2_wrapper.image.image_to_3d --input <image> --output <output_dir>
+python -m ai_model.image.image_to_3d --input <image> --output <output_dir>
 ```
 
 - `--input`: Path to the input image file
@@ -17,7 +17,7 @@ python -m smolvlm2_wrapper.image.image_to_3d --input <image> --output <output_di
 
 ## Example
 ```bash
-python -m smolvlm2_wrapper.image.image_to_3d --input ./photo.jpg --output ./3d_output
+python -m ai_model.image.image_to_3d --input ./photo.jpg --output ./3d_output
 ```
 
 ## Notes

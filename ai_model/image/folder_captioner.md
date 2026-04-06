@@ -5,13 +5,13 @@ Batch-caption a folder of images for LoRA training. Supports SD1.5, SDXL (via 's
 ## Usage
 
 ```bash
-python -m smolvlm2_wrapper.image.folder_captioner --input <folder> --model <model_type> [--output <folder>]
+python -m ai_model.image.folder_captioner --input <folder> --model <model_type> [--output <folder>]
 ```
 - `model_type`: sd15 | sdxl | natural
 
 Example:
 ```bash
-python -m smolvlm2_wrapper.image.folder_captioner --input ./images --model sd15 --output ./captions
+python -m ai_model.image.folder_captioner --input ./images --model sd15 --output ./captions
 ```
 
 - Outputs a .txt file per image, plus captions.json and captions.csv in the output folder.

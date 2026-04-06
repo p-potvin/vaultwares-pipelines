@@ -17,9 +17,9 @@ import json
 import csv
 from pathlib import Path
 from PIL import Image
-from smolvlm2_wrapper import SmolVLM2Wrapper
-from smolvlm2_wrapper.text.processor import TextProcessor
-from smolvlm2_wrapper.utils.io import load_image
+from ai_model import SmolVLM2Wrapper
+from ai_model.text.processor import TextProcessor
+from ai_model.utils.io import load_image
 
 def get_style(model_type):
     if model_type.lower() in ["sd15", "sdxl"]:

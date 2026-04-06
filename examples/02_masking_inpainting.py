@@ -17,12 +17,12 @@ from pathlib import Path
 
 from PIL import Image
 
-from smolvlm2_wrapper.image.mask import (
+from ai_model.image.mask import (
     create_rect_mask, create_circular_mask, mask_from_color,
     feather_mask, apply_mask, invert_mask,
 )
-from smolvlm2_wrapper.image.inpaint import inpaint, outpaint, heal
-from smolvlm2_wrapper.utils.io import load_image, save_image
+from ai_model.image.inpaint import inpaint, outpaint, heal
+from ai_model.utils.io import load_image, save_image
 
 
 def run(image_path: str, output_dir: str = "/tmp/smolvlm2_demo/masks") -> None:

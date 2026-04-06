@@ -1,7 +1,7 @@
 """Text processing sub-package."""
 
-from smolvlm2_wrapper.text.processor import TextProcessor
-from smolvlm2_wrapper.text.prompts import (
+from ai_model.text.processor import TextProcessor
+from ai_model.text.prompts import (
     build_caption_prompt,
     build_vqa_prompt,
     build_enhancement_prompt,

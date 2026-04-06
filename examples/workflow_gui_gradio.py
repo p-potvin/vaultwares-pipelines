@@ -18,7 +18,7 @@ from PIL import Image
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from smolvlm2_wrapper.cosmos_3d_env_workflow import cosmos_3d_env_run
+from ai_model.cosmos_3d_env_workflow import cosmos_3d_env_run
 
 
 # LRU Model Cache for all workflows
@@ -256,7 +256,7 @@ WORKFLOWS = {
 def run_image_editing_chain(params, log):
     from PIL import Image
     import numpy as np
-    from smolvlm2_wrapper.image import mask as mask_mod, inpaint as inpaint_mod
+    from ai_model.image import mask as mask_mod, inpaint as inpaint_mod
     input_image = params.get("input_image")
     edit_type = params.get("edit_type")
     session = SessionTracker()
@@ -283,7 +283,7 @@ def run_image_editing_chain(params, log):
             MODEL_CACHE.offload(cache_key)
         return out, "Object removal (inpainted central region)"
     elif edit_type == "detailer":
-        from smolvlm2_wrapper.image import manipulation
+        from ai_model.image import manipulation
         log("Applying detailer (sharpen + contrast)...")
         out = manipulation.sharpen(img, percent=200)
         out = manipulation.adjust_contrast(out, 1.3)

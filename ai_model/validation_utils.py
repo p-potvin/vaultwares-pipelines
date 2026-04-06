@@ -3,7 +3,7 @@ Validation and error reporting utilities for multi-agent workflows.
 """
 from typing import Any, Dict, List
 from pydantic import ValidationError
-from smolvlm2_wrapper.shared_context import SharedContext
+from ai_model.shared_context import SharedContext
 
 class ValidationUtils:
     @staticmethod

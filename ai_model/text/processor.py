@@ -3,11 +3,12 @@ High-level :class:`TextProcessor` for text and prompt operations.
 
 Usage::
 
-    from smolvlm2_wrapper import SmolVLM2Wrapper
-    from smolvlm2_wrapper.text.processor import TextProcessor
+    from ai_model import SmolVLM2Wrapper
+    from ai_model import TextModelWrapper
+    from ai_model.text.processor import TextProcessor
     from PIL import Image
 
-    model = GenericTextModelWrapper()
+    model = TextModelWrapper()
     tp = TextProcessor(model=model)
 
     caption = tp.caption(Image.open("photo.jpg"), style="detailed")
@@ -24,7 +25,7 @@ from typing import Any, List, Optional
 
 from PIL import Image
 
-from smolvlm2_wrapper.text.prompts import (
+from ai_model.text.prompts import (
     build_caption_prompt,
     build_vqa_prompt,
     build_enhancement_prompt,
@@ -46,7 +47,7 @@ class TextProcessor(ExtrovertAgent):
     ----------
     model:
         Any object with a compatible ``generate(prompt, images, videos)``
-        method (e.g. :class:`~smolvlm2_wrapper.core.smolvlm2.GenericTextModelWrapper`).
+        method (e.g. :class:`~ai_model.core.text.TextModelWrapper`).
     """
 
     def __init__(self, model=None) -> None:

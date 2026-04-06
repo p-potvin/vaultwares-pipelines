@@ -4,7 +4,7 @@ optional SmolVLM2 analysis into a single fluent interface.
 
 Usage (standalone)::
 
-    from smolvlm2_wrapper.video.processor import VideoProcessor
+    from ai_model.video.processor import VideoProcessor
 
     proc = VideoProcessor()
     proc.load("clip.mp4") \
@@ -15,7 +15,7 @@ Usage (standalone)::
 
 Usage (with model)::
 
-    from smolvlm2_wrapper import SmolVLM2Wrapper, VideoProcessor
+    from ai_model import SmolVLM2Wrapper, VideoProcessor
 
     model = SmolVLM2Wrapper()
     proc  = VideoProcessor(model=model)
@@ -32,7 +32,7 @@ from typing import Any, Callable, List, Optional, Tuple, Union
 
 from PIL import Image
 
-from smolvlm2_wrapper.video import manipulation, utils as vid_utils
+from ai_model.video import manipulation, utils as vid_utils
 import importlib
 ExtrovertAgent = importlib.import_module('vaultwares-agentciation.extrovert_agent').ExtrovertAgent
 AgentStatus = importlib.import_module('vaultwares-agentciation.enums').AgentStatus
@@ -46,7 +46,7 @@ class VideoProcessor(ExtrovertAgent):
     Parameters
     ----------
     model:
-        Optional :class:`~smolvlm2_wrapper.core.model.BaseModelWrapper`.
+        Optional :class:`~ai_model.core.model.BaseModelWrapper`.
         Enables :meth:`describe` and :meth:`caption_frames`.
     """
 
@@ -83,7 +83,7 @@ class VideoProcessor(ExtrovertAgent):
 
             proc.load("clip.mp4")
         """
-        from smolvlm2_wrapper.utils.io import load_video
+        from ai_model.utils.io import load_video
         try:
             import cv2
             cap = cv2.VideoCapture(str(source))
@@ -161,7 +161,7 @@ class VideoProcessor(ExtrovertAgent):
 
             proc.load("clip.mp4").resize(640, 360).save("small.mp4")
         """
-        from smolvlm2_wrapper.utils.io import save_video
+        from ai_model.utils.io import save_video
         return save_video(self._frames, dest, fps=fps or self._fps)
 
     def save_gif(self, dest: Union[str, Path], fps: float = 10.0) -> Path:
@@ -226,11 +226,11 @@ class VideoProcessor(ExtrovertAgent):
         ----------
         effect:
             Callable ``Image → Image``.  Any function from
-            :mod:`smolvlm2_wrapper.image.manipulation` works here.
+            :mod:`ai_model.image.manipulation` works here.
 
         Example::
 
-            from smolvlm2_wrapper.image.manipulation import sharpen
+            from ai_model.image.manipulation import sharpen
             proc.load("clip.mp4").apply_effect(lambda f: sharpen(f, percent=150)).save("sharp.mp4")
         """
         self._frames = manipulation.apply_frame_effect(self._frames, effect)

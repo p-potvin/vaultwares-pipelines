@@ -10,7 +10,7 @@ import threading
 sys.path.append(os.getcwd())
 sys.path.append(os.path.join(os.getcwd(), "vaultwares-agentciation"))
 
-from smolvlm2_wrapper import TextProcessor, ImageProcessor, VideoProcessor, Workflow
+from ai_model import TextProcessor, ImageProcessor, VideoProcessor, Workflow
 import importlib
 LonelyManager = importlib.import_module('vaultwares-agentciation.lonely_manager').LonelyManager
 AgentStatus = importlib.import_module('vaultwares-agentciation.enums').AgentStatus

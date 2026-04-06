@@ -3,20 +3,20 @@ Demo: Complex text-to-image workflow with image editing and detailer chain.
 This script instantiates agents, connects them via shared context and event bus,
 and executes a multi-stage workflow: text→image→edit (bbox/segment swap, object removal, detailer).
 """
-from smolvlm2_wrapper.shared_context import SharedContext
-from smolvlm2_wrapper.agent_interface import AgentInterface
-from smolvlm2_wrapper.event_bus import EventBus
-from smolvlm2_wrapper.central_error_logger import CentralErrorLogger
+from ai_model.shared_context import SharedContext
+from ai_model.agent_interface import AgentInterface
+from ai_model.event_bus import EventBus
+from ai_model.central_error_logger import CentralErrorLogger
 # Assume these agent classes exist and are imported:
-# from smolvlm2_wrapper.agent_text import TextProcessor
-# from smolvlm2_wrapper.agent_image import ImageProcessor
-# from smolvlm2_wrapper.workflow_export_agent import WorkflowExportAgent
+# from ai_model.agent_text import TextProcessor
+# from ai_model.agent_image import ImageProcessor
+# from ai_model.workflow_export_agent import WorkflowExportAgent
 
 
 # Use real model-powered agents
-from smolvlm2_wrapper import GenericTextModelWrapper
-from smolvlm2_wrapper.text.processor import TextProcessor as RealTextProcessor
-from smolvlm2_wrapper.image.processor import ImageProcessor as RealImageProcessor
+from ai_model import GenericTextModelWrapper
+from ai_model.text.processor import TextProcessor as RealTextProcessor
+from ai_model.image.processor import ImageProcessor as RealImageProcessor
 from PIL import Image
 
 # Instantiate real model

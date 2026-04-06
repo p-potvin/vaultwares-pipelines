@@ -19,8 +19,8 @@ from pathlib import Path
 from PIL import Image
 
 # ── package imports ────────────────────────────────────────────────────────────
-from smolvlm2_wrapper.image.processor import ImageProcessor
-from smolvlm2_wrapper.image.manipulation import (
+from ai_model.image.processor import ImageProcessor
+from ai_model.image.manipulation import (
     resize, sharpen, blur, adjust_brightness,
     adjust_contrast, adjust_saturation, upscale,
 )
@@ -69,7 +69,7 @@ def run(image_path: str, output_dir: str = "/tmp/smolvlm2_demo") -> None:
 
     # ── 8. (optional) model captioning ───────────────────────────────────────
     try:
-        from smolvlm2_wrapper import GenericTextModelWrapper
+        from ai_model import GenericTextModelWrapper
         model = GenericTextModelWrapper()
         proc2 = ImageProcessor(model=model)
         proc2.load(image_path)

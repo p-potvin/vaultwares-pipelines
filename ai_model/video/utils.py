@@ -40,7 +40,7 @@ def sample_frames(
 
     Example::
 
-        from smolvlm2_wrapper.video.utils import sample_frames
+        from ai_model.video.utils import sample_frames
         frames = sample_frames("clip.mp4", n=8)
     """
     try:

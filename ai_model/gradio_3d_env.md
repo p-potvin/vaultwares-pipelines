@@ -11,7 +11,7 @@ This module provides a Gradio-based interface for generating 3D environments fro
 ## Usage
 
 ```bash
-python -m smolvlm2_wrapper.gradio_3d_env
+python -m ai_model.examples.gradio_3d_env
 ```
 
 - The UI will open in your browser.

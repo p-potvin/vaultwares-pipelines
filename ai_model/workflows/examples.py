@@ -1,7 +1,7 @@
 """
 Ready-to-use workflow examples.
 
-Each class is a :class:`~smolvlm2_wrapper.workflows.base.Workflow` sub-class
+Each class is a :class:`~ai_model.workflows.base.Workflow` sub-class
 pre-configured for a specific use-case.  They are both useful stand-alone
 and serve as templates for custom pipelines.
 
@@ -15,8 +15,8 @@ Available workflows
 
 Usage::
 
-    from smolvlm2_wrapper import GenericTextModelWrapper
-    from smolvlm2_wrapper.workflows.examples import PhotoEnhancementWorkflow
+    from ai_model import GenericTextModelWrapper
+    from ai_model.workflows.examples import PhotoEnhancementWorkflow
 
     model = GenericTextModelWrapper()
     wf = PhotoEnhancementWorkflow(model=model)
@@ -33,7 +33,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-from smolvlm2_wrapper.workflows.base import Workflow, Step
+from ai_model.workflows.base import Workflow, Step
 
 
 # --------------------------------------------------------------------------- #
@@ -41,18 +41,18 @@ from smolvlm2_wrapper.workflows.base import Workflow, Step
 # --------------------------------------------------------------------------- #
 
 def _load_image(ctx: Dict[str, Any]) -> Dict[str, Any]:
-    from smolvlm2_wrapper.utils.io import load_image
+    from ai_model.utils.io import load_image
     return {**ctx, "image": load_image(ctx["image_path"])}
 
 
 def _save_image(ctx: Dict[str, Any]) -> Dict[str, Any]:
-    from smolvlm2_wrapper.utils.io import save_image
+    from ai_model.utils.io import save_image
     save_image(ctx["image"], ctx["output_path"])
     return ctx
 
 
 def _save_video(ctx: Dict[str, Any]) -> Dict[str, Any]:
-    from smolvlm2_wrapper.utils.io import save_video
+    from ai_model.utils.io import save_video
     save_video(ctx["frames"], ctx["output_path"], fps=ctx.get("fps", 24))
     return ctx
 
@@ -83,8 +83,8 @@ class PhotoEnhancementWorkflow(Workflow):
 
     Example::
 
-        from smolvlm2_wrapper import GenericTextModelWrapper
-        from smolvlm2_wrapper.workflows.examples import PhotoEnhancementWorkflow
+        from ai_model import GenericTextModelWrapper
+        from ai_model.workflows.examples import PhotoEnhancementWorkflow
 
         wf = PhotoEnhancementWorkflow(model=GenericTextModelWrapper())
         result = wf.run({"image_path": "photo.jpg", "output_path": "out.jpg"})
@@ -99,28 +99,28 @@ class PhotoEnhancementWorkflow(Workflow):
         self.add_step(Step(
             "resize",
             lambda ctx: {**ctx, "image": __import__(
-                "smolvlm2_wrapper.image.manipulation", fromlist=["resize"]
+                "ai_model.image.manipulation", fromlist=["resize"]
             ).resize(ctx["image"], ctx.get("width", 1024), ctx.get("height", 768))},
             "Resize to target dimensions.",
         ))
         self.add_step(Step(
             "sharpen",
             lambda ctx: {**ctx, "image": __import__(
-                "smolvlm2_wrapper.image.manipulation", fromlist=["sharpen"]
+                "ai_model.image.manipulation", fromlist=["sharpen"]
             ).sharpen(ctx["image"], percent=ctx.get("sharpen_percent", 150))},
             "Unsharp-mask sharpening.",
         ))
         self.add_step(Step(
             "brightness",
             lambda ctx: {**ctx, "image": __import__(
-                "smolvlm2_wrapper.image.manipulation", fromlist=["adjust_brightness"]
+                "ai_model.image.manipulation", fromlist=["adjust_brightness"]
             ).adjust_brightness(ctx["image"], ctx.get("brightness", 1.1))},
             "Adjust brightness.",
         ))
         self.add_step(Step(
             "contrast",
             lambda ctx: {**ctx, "image": __import__(
-                "smolvlm2_wrapper.image.manipulation", fromlist=["adjust_contrast"]
+                "ai_model.image.manipulation", fromlist=["adjust_contrast"]
             ).adjust_contrast(ctx["image"], ctx.get("contrast", 1.2))},
             "Adjust contrast.",
         ))
@@ -159,8 +159,8 @@ class VideoAnalysisWorkflow(Workflow):
 
     Example::
 
-        from smolvlm2_wrapper import GenericTextModelWrapper
-        from smolvlm2_wrapper.workflows.examples import VideoAnalysisWorkflow
+        from ai_model import GenericTextModelWrapper
+        from ai_model.workflows.examples import VideoAnalysisWorkflow
 
         wf = VideoAnalysisWorkflow(model=GenericTextModelWrapper())
         result = wf.run({"video_path": "clip.mp4"})
@@ -172,7 +172,7 @@ class VideoAnalysisWorkflow(Workflow):
         self._model = model
 
         def _sample(ctx: Dict[str, Any]) -> Dict[str, Any]:
-            from smolvlm2_wrapper.video.utils import sample_frames
+            from ai_model.video.utils import sample_frames
             return {**ctx, "frames": sample_frames(ctx["video_path"], n=ctx.get("n_frames", 8))}
 
         self.add_step(Step("sample_frames", _sample, "Sample N frames from the video."))
@@ -181,7 +181,7 @@ class VideoAnalysisWorkflow(Workflow):
             m = ctx.get("model") or model
             if m is None:
                 return {**ctx, "description": ""}
-            from smolvlm2_wrapper.text.prompts import build_video_description_prompt
+            from ai_model.text.prompts import build_video_description_prompt
             prompt = build_video_description_prompt(ctx.get("description_focus", "action"))
             return {**ctx, "description": m.generate(prompt, videos=[ctx["frames"]])}
 
@@ -219,8 +219,8 @@ class PromptGenerationWorkflow(Workflow):
 
     Example::
 
-        from smolvlm2_wrapper import GenericTextModelWrapper
-        from smolvlm2_wrapper.workflows.examples import PromptGenerationWorkflow
+        from ai_model import GenericTextModelWrapper
+        from ai_model.workflows.examples import PromptGenerationWorkflow
 
         wf = PromptGenerationWorkflow(model=GenericTextModelWrapper())
         result = wf.run({"image_path": "photo.jpg"})
@@ -277,7 +277,7 @@ class InpaintingWorkflow(Workflow):
 
     Example::
 
-        from smolvlm2_wrapper.workflows.examples import InpaintingWorkflow
+        from ai_model.workflows.examples import InpaintingWorkflow
 
         wf = InpaintingWorkflow()
         result = wf.run({
@@ -294,7 +294,7 @@ class InpaintingWorkflow(Workflow):
         self.add_step(Step("load", _load_image, "Load image."))
 
         def _make_mask(ctx: Dict[str, Any]) -> Dict[str, Any]:
-            from smolvlm2_wrapper.image.mask import create_rect_mask, feather_mask
+            from ai_model.image.mask import create_rect_mask, feather_mask
             img = ctx["image"]
             w, h = img.size
             raw_mask = create_rect_mask(w, h, ctx["mask_box"])
@@ -304,7 +304,7 @@ class InpaintingWorkflow(Workflow):
         self.add_step(Step("create_mask", _make_mask, "Create rectangular feathered mask."))
 
         def _inpaint(ctx: Dict[str, Any]) -> Dict[str, Any]:
-            from smolvlm2_wrapper.image.inpaint import inpaint
+            from ai_model.image.inpaint import inpaint
             return {**ctx, "image": inpaint(ctx["image"], ctx["mask"], model=model)}
 
         self.add_step(Step("inpaint", _inpaint, "Fill masked region."))
@@ -345,8 +345,8 @@ class VideoEditWorkflow(Workflow):
 
     Example::
 
-        from smolvlm2_wrapper.image.manipulation import sharpen
-        from smolvlm2_wrapper.workflows.examples import VideoEditWorkflow
+        from ai_model.image.manipulation import sharpen
+        from ai_model.workflows.examples import VideoEditWorkflow
 
         wf = VideoEditWorkflow()
         wf.run({
@@ -365,7 +365,7 @@ class VideoEditWorkflow(Workflow):
         self._model = model
 
         def _load_video(ctx: Dict[str, Any]) -> Dict[str, Any]:
-            from smolvlm2_wrapper.utils.io import load_video
+            from ai_model.utils.io import load_video
             import cv2
             cap = cv2.VideoCapture(str(ctx["video_path"]))
             fps = cap.get(cv2.CAP_PROP_FPS) or 24.0
@@ -376,7 +376,7 @@ class VideoEditWorkflow(Workflow):
         self.add_step(Step("load", _load_video, "Load video frames."))
 
         def _trim(ctx: Dict[str, Any]) -> Dict[str, Any]:
-            from smolvlm2_wrapper.video.manipulation import trim_frames
+            from ai_model.video.manipulation import trim_frames
             return {**ctx, "frames": trim_frames(
                 ctx["frames"],
                 start=ctx.get("trim_start", 0),
@@ -388,7 +388,7 @@ class VideoEditWorkflow(Workflow):
         def _resize(ctx: Dict[str, Any]) -> Dict[str, Any]:
             w, h = ctx.get("width"), ctx.get("height")
             if w and h:
-                from smolvlm2_wrapper.video.manipulation import resize_frames
+                from ai_model.video.manipulation import resize_frames
                 return {**ctx, "frames": resize_frames(ctx["frames"], w, h)}
             return ctx
 
@@ -397,7 +397,7 @@ class VideoEditWorkflow(Workflow):
         def _effect(ctx: Dict[str, Any]) -> Dict[str, Any]:
             fn = ctx.get("effect")
             if fn is not None:
-                from smolvlm2_wrapper.video.manipulation import apply_frame_effect
+                from ai_model.video.manipulation import apply_frame_effect
                 return {**ctx, "frames": apply_frame_effect(ctx["frames"], fn)}
             return ctx
 
@@ -406,7 +406,7 @@ class VideoEditWorkflow(Workflow):
 
         if model is not None:
             def _describe(ctx: Dict[str, Any]) -> Dict[str, Any]:
-                from smolvlm2_wrapper.video.utils import sample_frames as _sf
+                from ai_model.video.utils import sample_frames as _sf
                 sampled = ctx["frames"][::max(1, len(ctx["frames"]) // 8)][:8]
                 return {**ctx, "description": model.describe_video(sampled)}
             self.add_step(Step("describe", _describe, "Describe processed video."))

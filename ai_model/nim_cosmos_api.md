@@ -14,7 +14,7 @@ This module provides a Python client for calling the NVIDIA NIM Cosmos microserv
    ```
 3. Use the `NIMCosmosClient` in your pipeline:
    ```python
-   from smolvlm2_wrapper.nim_cosmos_api import NIMCosmosClient
+   from ai_model.nim_cosmos_api import NIMCosmosClient
    client = NIMCosmosClient()
    result = client.infer_3d([frame1_bytes, frame2_bytes, ...])
    # result contains depth, pose, mesh, etc.

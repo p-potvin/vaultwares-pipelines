@@ -14,8 +14,8 @@ This workflow demonstrates:
 
 import argparse
 from pathlib import Path
-from smolvlm2_wrapper import GenericTextModelWrapper, ImageProcessor
-from smolvlm2_wrapper.utils.io import load_image, save_image
+from ai_model import GenericTextModelWrapper, ImageProcessor
+from ai_model.utils.io import load_image, save_image
 from PIL import Image
 
 def run(prompt: str, output_dir: str = "outputs/optimal_workflow", model_id: str = None):

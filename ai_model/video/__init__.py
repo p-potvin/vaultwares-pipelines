@@ -1,7 +1,7 @@
 """Video processing sub-package."""
 
-from smolvlm2_wrapper.video.processor import VideoProcessor
-from smolvlm2_wrapper.video.manipulation import (
+from ai_model.video.processor import VideoProcessor
+from ai_model.video.manipulation import (
     trim_frames,
     resize_frames,
     reverse_frames,
@@ -9,7 +9,7 @@ from smolvlm2_wrapper.video.manipulation import (
     add_frame_overlay,
     stabilize_frames,
 )
-from smolvlm2_wrapper.video.utils import (
+from ai_model.video.utils import (
     sample_frames,
     frames_to_gif,
     add_audio,

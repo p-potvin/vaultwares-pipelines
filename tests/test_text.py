@@ -4,7 +4,7 @@ import pytest
 from PIL import Image
 import numpy as np
 
-from smolvlm2_wrapper.text.prompts import (
+from ai_model.text.prompts import (
     build_caption_prompt,
     build_vqa_prompt,
     build_enhancement_prompt,
@@ -12,7 +12,7 @@ from smolvlm2_wrapper.text.prompts import (
     PromptTemplate,
     STYLE_PROMPTS,
 )
-from smolvlm2_wrapper.text.processor import TextProcessor
+from ai_model.text.processor import TextProcessor
 
 
 # ------------------------------------------------------------------ #

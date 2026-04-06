@@ -4,17 +4,17 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from smolvlm2_wrapper.image.manipulation import (
+from ai_model.image.manipulation import (
     resize, crop, rotate, flip, sharpen, blur,
     adjust_brightness, adjust_contrast, adjust_saturation,
     apply_filter, upscale, convert_color_space, add_noise, denoise,
 )
-from smolvlm2_wrapper.image.mask import (
+from ai_model.image.mask import (
     create_mask, create_rect_mask, create_circular_mask,
     apply_mask, invert_mask, feather_mask, mask_from_color,
 )
-from smolvlm2_wrapper.image.inpaint import inpaint, outpaint, heal
-from smolvlm2_wrapper.image.processor import ImageProcessor
+from ai_model.image.inpaint import inpaint, outpaint, heal
+from ai_model.image.processor import ImageProcessor
 
 
 # ------------------------------------------------------------------ #

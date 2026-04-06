@@ -8,7 +8,7 @@ any module can be wired together without subclassing.
 
 Usage::
 
-    from smolvlm2_wrapper.workflows.base import Workflow, Step
+    from ai_model.workflows.base import Workflow, Step
 
     wf = Workflow(name="MyPipeline")
     wf.add_step(Step("load",    lambda ctx: ctx.update(image=load_image(ctx["path"])) or ctx))
@@ -52,7 +52,7 @@ class Step:
 
     Example::
 
-        from smolvlm2_wrapper.image.manipulation import sharpen
+        from ai_model.image.manipulation import sharpen
         step = Step(
             name="sharpen",
             fn=lambda ctx: {**ctx, "image": sharpen(ctx["image"])},
@@ -147,7 +147,7 @@ class Workflow(ExtrovertAgent):
         return ctx
         total_start = time.perf_counter()
 
-        from smolvlm2_wrapper.compliance import check_compliance
+        from ai_model.compliance import check_compliance
         for step in self._steps:
             t0 = time.perf_counter()
             logger.debug("[%s] Running step: %s", self.name, step.name)

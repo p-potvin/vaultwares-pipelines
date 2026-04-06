@@ -2,8 +2,8 @@
 Central error log and feedback loop for multi-agent workflows.
 Subscribes to error events and maintains a persistent error log.
 """
-from smolvlm2_wrapper.event_bus import EventBus
-from smolvlm2_wrapper.shared_context import SharedContext
+from ai_model.event_bus import EventBus
+from ai_model.shared_context import SharedContext
 
 class CentralErrorLogger:
     def __init__(self, shared_context: SharedContext):

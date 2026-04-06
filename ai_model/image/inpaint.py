@@ -14,7 +14,7 @@ Quick reference
 
 Model-accelerated variants
 --------------------------
-If a :class:`~smolvlm2_wrapper.core.model.BaseModelWrapper` sub-class is
+If a :class:`~ai_model.core.model.BaseModelWrapper` sub-class is
 passed as *model*, the function will call ``model.generate()`` and use the
 SmolVLM2 description to guide the fill.  In practice a dedicated inpainting
 model (e.g. Stable Diffusion Inpaint via HuggingFace diffusers) should be
@@ -69,8 +69,8 @@ def inpaint(
 
     Workflow example::
 
-        from smolvlm2_wrapper.image.mask import create_rect_mask
-        from smolvlm2_wrapper.image.inpaint import inpaint
+        from ai_model.image.mask import create_rect_mask
+        from ai_model.image.inpaint import inpaint
 
         mask = create_rect_mask(w, h, (200, 200, 400, 400))
         result = inpaint(photo, mask)
@@ -215,7 +215,7 @@ def heal(
 
     Example::
 
-        from smolvlm2_wrapper.image.mask import create_circular_mask
+        from ai_model.image.mask import create_circular_mask
         # Remove a watermark at (cx, cy) with radius 30
         mask = create_circular_mask(w, h, center=(cx, cy), radius=30)
         clean = heal(photo, mask)

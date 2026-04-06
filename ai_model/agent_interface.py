@@ -2,7 +2,7 @@
 Base interface for agents to interact with the shared context in multi-agent workflows.
 """
 from typing import Any
-from smolvlm2_wrapper.shared_context import SharedContext
+from ai_model.shared_context import SharedContext
 
 class AgentInterface:
     def __init__(self, name: str, shared_context: SharedContext):

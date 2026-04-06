@@ -1,8 +1,8 @@
 """Tests for core configuration and device management."""
 
 import pytest
-from smolvlm2_wrapper.core.config import ModelConfig
-from smolvlm2_wrapper.utils.device import DeviceManager
+from ai_model.core.config import ModelConfig
+from ai_model.utils.device import DeviceManager
 
 
 class TestModelConfig:

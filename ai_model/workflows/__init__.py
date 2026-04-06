@@ -1,7 +1,7 @@
 """Workflows sub-package."""
 
-from smolvlm2_wrapper.workflows.base import Workflow, Step
-from smolvlm2_wrapper.workflows.examples import (
+from ai_model.workflows.base import Workflow, Step
+from ai_model.workflows.examples import (
     PhotoEnhancementWorkflow,
     VideoAnalysisWorkflow,
     PromptGenerationWorkflow,

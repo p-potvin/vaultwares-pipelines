@@ -7,7 +7,7 @@ themselves.
 
 Usage::
 
-    from smolvlm2_wrapper.utils.io import load_image, save_image
+    from ai_model.utils.io import load_image, save_image
 
     img = load_image("photo.jpg")
     save_image(img, "/tmp/out.png")
@@ -42,7 +42,7 @@ def load_image(source: Union[str, Path, Image.Image]) -> Image.Image:
 
     Example::
 
-        from smolvlm2_wrapper.utils.io import load_image
+        from ai_model.utils.io import load_image
         img = load_image("photo.jpg")
     """
     if isinstance(source, Image.Image):

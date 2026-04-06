@@ -5,7 +5,7 @@ device at runtime and emits helpful log messages.
 
 Usage::
 
-    from smolvlm2_wrapper.utils.device import DeviceManager
+    from ai_model.utils.device import DeviceManager
 
     dm = DeviceManager("auto")
     device = dm.resolve()   # e.g. "cuda", "mps", or "cpu"

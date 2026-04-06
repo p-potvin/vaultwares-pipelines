@@ -17,8 +17,8 @@ This example shows:
 import argparse
 from pathlib import Path
 
-from smolvlm2_wrapper.video.processor import VideoProcessor
-from smolvlm2_wrapper.image.manipulation import sharpen, adjust_contrast
+from ai_model.video.processor import VideoProcessor
+from ai_model.image.manipulation import sharpen, adjust_contrast
 
 
 def run(video_path: str, output_dir: str = "/tmp/smolvlm2_demo/video") -> None:
@@ -61,7 +61,7 @@ def run(video_path: str, output_dir: str = "/tmp/smolvlm2_demo/video") -> None:
 
     # ── 6. (optional) model description ─────────────────────────────────────
     try:
-        from smolvlm2_wrapper import GenericTextModelWrapper
+        from ai_model import GenericTextModelWrapper
         model = GenericTextModelWrapper()
         desc_proc = VideoProcessor(model=model)
         desc_proc.set_frames(proc.get_frames())

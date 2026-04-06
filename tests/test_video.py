@@ -4,12 +4,12 @@ import numpy as np
 import pytest
 from PIL import Image
 
-from smolvlm2_wrapper.video.manipulation import (
+from ai_model.video.manipulation import (
     trim_frames, resize_frames, reverse_frames,
     apply_frame_effect, add_frame_overlay,
 )
-from smolvlm2_wrapper.video.utils import frames_to_gif
-from smolvlm2_wrapper.video.processor import VideoProcessor
+from ai_model.video.utils import frames_to_gif
+from ai_model.video.processor import VideoProcessor
 
 
 # ------------------------------------------------------------------ #
@@ -50,7 +50,7 @@ class TestVideoManipulation:
         assert rev == f[::-1]
 
     def test_apply_frame_effect(self):
-        from smolvlm2_wrapper.image.manipulation import blur
+        from ai_model.image.manipulation import blur
         f = _frames(4)
         out = apply_frame_effect(f, lambda fr: blur(fr, radius=1))
         assert len(out) == 4
@@ -111,7 +111,7 @@ class TestVideoProcessor:
         assert proc.get_frames() == f[::-1]
 
     def test_apply_effect(self):
-        from smolvlm2_wrapper.image.manipulation import sharpen
+        from ai_model.image.manipulation import sharpen
         proc = VideoProcessor()
         proc.set_frames(_frames(3))
         proc.apply_effect(lambda fr: sharpen(fr, percent=150))

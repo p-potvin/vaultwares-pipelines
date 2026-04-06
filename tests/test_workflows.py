@@ -4,8 +4,8 @@ import pytest
 from PIL import Image
 import numpy as np
 
-from smolvlm2_wrapper.workflows.base import Workflow, Step
-from smolvlm2_wrapper.workflows.examples import (
+from ai_model.workflows.base import Workflow, Step
+from ai_model.workflows.examples import (
     PhotoEnhancementWorkflow,
     InpaintingWorkflow,
     PromptGenerationWorkflow,
@@ -156,7 +156,7 @@ class TestPromptGenerationWorkflow:
 
 class TestIOUtils:
     def test_save_load_image(self, tmp_path):
-        from smolvlm2_wrapper.utils.io import save_image, load_image
+        from ai_model.utils.io import save_image, load_image
         img = _img()
         dest = tmp_path / "test.png"
         save_image(img, dest)
@@ -164,12 +164,12 @@ class TestIOUtils:
         assert loaded.size == img.size
 
     def test_load_image_missing(self, tmp_path):
-        from smolvlm2_wrapper.utils.io import load_image
+        from ai_model.utils.io import load_image
         with pytest.raises(FileNotFoundError):
             load_image(tmp_path / "does_not_exist.png")
 
     def test_load_pil_passthrough(self):
-        from smolvlm2_wrapper.utils.io import load_image
+        from ai_model.utils.io import load_image
         img = _img()
         loaded = load_image(img)
         assert loaded.mode == "RGB"

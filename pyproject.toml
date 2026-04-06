@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "smolvlm2-wrapper"
+name = "ai-model"
 version = "0.1.0"
-description = "Multi-modal wrapper for SmolVLM2-500M-Video-Instruct – image, video and text manipulation toolkit for low-power devices."
+description = "Multi-modal wrapper for Stable Diffusion models and more – image, video and text manipulation toolkit for low-power devices."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.9"
@@ -28,7 +28,7 @@ dev = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["smolvlm2_wrapper*"]
+include = ["ai_model*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

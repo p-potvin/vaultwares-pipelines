@@ -1,7 +1,7 @@
 """Tests for WorkflowExportAgent logic."""
 import pytest
-from smolvlm2_wrapper.workflow_export_agent import WorkflowExportAgent
-from smolvlm2_wrapper.shared_context import SharedContext
+from ai_model.workflow_export_agent import WorkflowExportAgent
+from ai_model.shared_context import SharedContext
 
 class DummyValidationUtils:
     @staticmethod
@@ -19,8 +19,8 @@ class DummyEventBus:
 
 
 def test_export_to_comfyui_success(monkeypatch):
-    monkeypatch.setattr("smolvlm2_wrapper.validation_utils.ValidationUtils", DummyValidationUtils)
-    monkeypatch.setattr("smolvlm2_wrapper.event_bus.EventBus", DummyEventBus)
+    monkeypatch.setattr("ai_model.validation_utils.ValidationUtils", DummyValidationUtils)
+    monkeypatch.setattr("ai_model.event_bus.EventBus", DummyEventBus)
     agent = WorkflowExportAgent(SharedContext())
     result = agent.export_to_comfyui({"foo": "bar"})
     assert result["success"]
@@ -36,8 +36,8 @@ def test_export_to_comfyui_validation_error(monkeypatch):
         @staticmethod
         def report_error(ctx, agent, err):
             pass
-    monkeypatch.setattr("smolvlm2_wrapper.validation_utils.ValidationUtils", FailingValidation)
-    monkeypatch.setattr("smolvlm2_wrapper.event_bus.EventBus", DummyEventBus)
+    monkeypatch.setattr("ai_model.validation_utils.ValidationUtils", FailingValidation)
+    monkeypatch.setattr("ai_model.event_bus.EventBus", DummyEventBus)
     agent = WorkflowExportAgent(SharedContext())
     result = agent.export_to_comfyui({"foo": "bar"})
     assert not result["success"]

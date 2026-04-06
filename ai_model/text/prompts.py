@@ -6,7 +6,7 @@ produce well-formed prompts for common multi-modal tasks.
 
 Usage::
 
-    from smolvlm2_wrapper.text.prompts import build_caption_prompt, PromptTemplate
+    from ai_model.text.prompts import build_caption_prompt, PromptTemplate
 
     prompt = build_caption_prompt(style="detailed")
     custom = PromptTemplate(

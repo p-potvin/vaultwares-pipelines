@@ -14,14 +14,14 @@ Demonstrates:
 import argparse
 from pathlib import Path
 
-from smolvlm2_wrapper.workflows.examples import (
+from ai_model.workflows.examples import (
     PhotoEnhancementWorkflow,
     InpaintingWorkflow,
     PromptGenerationWorkflow,
 )
-from smolvlm2_wrapper.workflows.base import Workflow, Step
-from smolvlm2_wrapper.image.manipulation import sharpen, adjust_contrast
-from smolvlm2_wrapper.utils.io import load_image, save_image
+from ai_model.workflows.base import Workflow, Step
+from ai_model.image.manipulation import sharpen, adjust_contrast
+from ai_model.utils.io import load_image, save_image
 
 
 def run(image_path: str, output_dir: str = "/tmp/smolvlm2_demo/workflows") -> None:
@@ -59,7 +59,7 @@ def run(image_path: str, output_dir: str = "/tmp/smolvlm2_demo/workflows") -> No
     # ── 3. PromptGenerationWorkflow (with model if available) ─────────────────
     print("\n── PromptGenerationWorkflow ─────────────────────────────────────")
     try:
-        from smolvlm2_wrapper import GenericTextModelWrapper
+        from ai_model import GenericTextModelWrapper
         model = GenericTextModelWrapper()
         wf3 = PromptGenerationWorkflow(model=model)
         result3 = wf3.run({"image_path": image_path})
@@ -79,7 +79,7 @@ def run(image_path: str, output_dir: str = "/tmp/smolvlm2_demo/workflows") -> No
         "denoise",
         lambda ctx: {
             **ctx,
-            "image": __import__("smolvlm2_wrapper.image.manipulation", fromlist=["denoise"])
+            "image": __import__("ai_model.image.manipulation", fromlist=["denoise"])
                      .denoise(ctx["image"], size=3),
         },
     ))
@@ -87,7 +87,7 @@ def run(image_path: str, output_dir: str = "/tmp/smolvlm2_demo/workflows") -> No
         "upscale",
         lambda ctx: {
             **ctx,
-            "image": __import__("smolvlm2_wrapper.image.manipulation", fromlist=["upscale"])
+            "image": __import__("ai_model.image.manipulation", fromlist=["upscale"])
                      .upscale(ctx["image"], scale=2),
         },
     ))

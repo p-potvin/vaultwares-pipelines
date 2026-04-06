@@ -7,8 +7,8 @@ import random
 sys.path.append(os.getcwd())
 sys.path.append(os.path.join(os.getcwd(), "vaultwares-agentciation"))
 
-from smolvlm2_wrapper import TextProcessor, ImageProcessor, VideoProcessor
-from smolvlm2_wrapper.core.smolvlm2 import GenericTextModelWrapper
+from ai_model import TextProcessor, ImageProcessor, VideoProcessor
+from ai_model.core.smolvlm2 import GenericTextModelWrapper
 import importlib
 LonelyManager = importlib.import_module('vaultwares-agentciation.lonely_manager').LonelyManager
 

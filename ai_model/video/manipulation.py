@@ -109,7 +109,7 @@ def apply_frame_effect(
         Input frames.
     effect:
         Callable that takes and returns a PIL image.  Any function from
-        :mod:`smolvlm2_wrapper.image.manipulation` works here.
+        :mod:`ai_model.image.manipulation` works here.
 
     Returns
     -------
@@ -118,7 +118,7 @@ def apply_frame_effect(
 
     Example::
 
-        from smolvlm2_wrapper.image.manipulation import sharpen
+        from ai_model.image.manipulation import sharpen
         sharp_frames = apply_frame_effect(frames, lambda f: sharpen(f, percent=150))
     """
     return [effect(frame) for frame in frames]

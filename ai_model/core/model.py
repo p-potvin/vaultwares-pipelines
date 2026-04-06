@@ -12,7 +12,7 @@ Design goals
 
 Usage (direct)::
 
-    from smolvlm2_wrapper.core.model import BaseModelWrapper
+    from ai_model.core.model import BaseModelWrapper
 
     class MyWrapper(BaseModelWrapper):
         def _load_model(self): ...
@@ -20,7 +20,7 @@ Usage (direct)::
 
 Usage (via SmolVLM2Wrapper)::
 
-    from smolvlm2_wrapper import SmolVLM2Wrapper
+    from ai_model import SmolVLM2Wrapper
     wrapper = SmolVLM2Wrapper()
     text = wrapper.generate("Describe this image", images=[pil_image])
 """
@@ -33,8 +33,8 @@ from typing import Any, List, Optional, Union
 
 from PIL import Image
 
-from smolvlm2_wrapper.core.config import ModelConfig
-from smolvlm2_wrapper.utils.device import DeviceManager
+from ai_model.core.config import ModelConfig
+from ai_model.utils.device import DeviceManager
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class BaseModelWrapper(ABC):
     Parameters
     ----------
     config:
-        A :class:`~smolvlm2_wrapper.core.config.ModelConfig` instance.
+        A :class:`~ai_model.core.config.ModelConfig` instance.
         When *None* the class-level ``DEFAULT_CONFIG`` is used, which
         defaults to SmolVLM2-500M.
     """

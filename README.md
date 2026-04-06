@@ -51,7 +51,7 @@ A modular platform for text, image, and video generation/editing using AI agents
 
 - **api_server.py**: FastAPI server for workflow CRUD, backup/restore, and NIM VM integration. Endpoints: `/workflows`, `/workflows/export`, `/workflows/backup`, `/workflows/restore`, etc.
 
-- **smolvlm2_wrapper/**: Main Python package for all agent logic.
+- **ai_model/**: Main Python package for all agent logic.
   - `agent_text.py`: Text agent (captioning, VQA, prompt engineering).
   - `agent_image.py`: Image agent (editing, masking, inpainting).
   - `agent_video.py`: Video agent (frame sampling, analysis, editing).
@@ -87,24 +87,28 @@ A modular platform for text, image, and video generation/editing using AI agents
 ---
 
 For more details, see in-line code comments and the [agent_manifest.md](agent_manifest.md) for planned features and architecture.
-- `smolvlm2_wrapper/agent_text.py` — Text agent logic
-- `smolvlm2_wrapper/agent_image.py` — Image agent logic
-- `smolvlm2_wrapper/agent_video.py` — Video agent logic
-- `smolvlm2_wrapper/agent_workflow.py` — Workflow orchestration
-- `smolvlm2_wrapper/context_schema.py` — Shared context definitions
-- `smolvlm2_wrapper/compliance.py` — Compliance hooks
-- `smolvlm2_wrapper/central_error_logger.py` — Error/event logging
-- `examples/workflow_gui_gradio.py` — Main GUI app
+- `ai_model/agent_text.py` — Text agent logic
+- `ai_model/agent_image.py` — Image agent logic
+- `ai_model/agent_video.py` — Video agent logic
+- `ai_model/agent_workflow.py` — Workflow orchestration
+- `ai_model/context_schema.py` — Shared context definitions
+- `ai_model/compliance.py` — Compliance hooks
+- `ai_model/workflow_export_agent.py` — Export workflows to ComfyUI/Diffusion formats
+- `ai_model/workflows/` — Built-in workflows
+- `ai_model/core/`, `ai_model/image/`, `ai_model/video/`, `ai_model/text/`, `ai_model/utils/` — Core model wrappers, manipulation utilities, and processors
+- `vaultwares-agentciation/extrovert_agent.py` — Team awareness, status, and socialization via Redis
+- `vaultwares-agentciation/lonely_manager.py` — Project alignment, TODO/roadmap monitoring, and nudges
+- `vaultwares-agentciation/base_agent.py` — Agent base classes
+- `vaultwares-agentciation/enums.py`, etc. — enums, and shared utilities
+- `examples/api_server.py` — FastAPI server
+- `vaultwares-agentciation/central_error_logger.py` — Error/event logging with correlationId
+- `examples/workflow_gui_gradio.py` — Quickstart Gradio GUI for workflow execution
 
-## Example Usage
-- **Text-to-Image:**
+## Example Usage (GUI)
+- **Text-to-Image Workflow:**
   1. Select "Text-to-Image" workflow in the GUI
   2. Enter a prompt and steps
   3. Click "Run Workflow" to generate an image
-- **Image Editing:**
-  1. Select "Image Editing Chain"
-  2. Upload an image and choose an edit type
-  3. Click "Run Workflow" to process
 
 ## Troubleshooting
 - If the GUI does not appear, open http://127.0.0.1:7860 manually
@@ -117,7 +121,7 @@ Pull requests and issues are welcome!
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     smolvlm2_wrapper                            │
+│                     ai_model                                           │
 │  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌──────────┐  │
 │  │   core/    │  │  image/    │  │  video/    │  │  text/   │  │
 │  │ model base │  │manipulation│  │manipulation│  │prompts & │  │
@@ -199,14 +203,14 @@ manager.stop()
 
 ### WorkflowExportAgent
 
-`smolvlm2_wrapper.workflow_export_agent.WorkflowExportAgent`
+`ai_model.workflow_export_agent.WorkflowExportAgent`
 
 Exports Python-based workflows to ComfyUI/Diffusion formats, with validation and event publishing.
 
 #### Example
 ```python
-from smolvlm2_wrapper.workflow_export_agent import WorkflowExportAgent
-from smolvlm2_wrapper.shared_context import SharedContext
+from ai_model.workflow_export_agent import WorkflowExportAgent
+from ai_model.shared_context import SharedContext
 agent = WorkflowExportAgent(SharedContext())
 result = agent.export_to_comfyui({"foo": "bar"})
 print(result)
@@ -243,7 +247,7 @@ pip install -r requirements.txt
 ### Caption an image
 
 ```python
-from smolvlm2_wrapper import SmolVLM2Wrapper
+from ai_model import SmolVLM2Wrapper
 from PIL import Image
 
 model = SmolVLM2Wrapper()
@@ -254,7 +258,7 @@ print(caption)
 ### Chain image operations
 
 ```python
-from smolvlm2_wrapper.image.processor import ImageProcessor
+from ai_model.image.processor import ImageProcessor
 
 result = (
     ImageProcessor()
@@ -270,7 +274,7 @@ result = (
 ### Describe a video
 
 ```python
-from smolvlm2_wrapper import SmolVLM2Wrapper, VideoProcessor
+from ai_model.video.processor import SmolVLM2Wrapper, VideoProcessor
 
 model = SmolVLM2Wrapper()
 desc = (
@@ -285,8 +289,8 @@ print(desc)
 ### Generate a Stable Diffusion prompt
 
 ```python
-from smolvlm2_wrapper import SmolVLM2Wrapper
-from smolvlm2_wrapper.text.processor import TextProcessor
+from ai_model.core.smolvlm2 import SmolVLM2Wrapper
+from ai_model.text.processor import TextProcessor
 from PIL import Image
 
 tp = TextProcessor(model=SmolVLM2Wrapper())
@@ -304,7 +308,7 @@ print(enhanced)
 #### `ModelConfig`
 
 ```python
-from smolvlm2_wrapper.core.config import ModelConfig
+from ai_model.core.config import ModelConfig
 
 cfg = ModelConfig(
     model_id="HuggingFaceTB/SmolVLM2-500M-Video-Instruct",
@@ -322,8 +326,8 @@ cfg = ModelConfig(
 Abstract base for any model.  Sub-class it to wrap your own model:
 
 ```python
-from smolvlm2_wrapper.core.model import BaseModelWrapper
-from smolvlm2_wrapper.core.config import ModelConfig
+from ai_model.core.model import BaseModelWrapper
+from ai_model.core.config import ModelConfig
 
 class MyModel(BaseModelWrapper):
     def _load_model(self):
@@ -338,7 +342,7 @@ class MyModel(BaseModelWrapper):
 #### `SmolVLM2Wrapper`
 
 ```python
-from smolvlm2_wrapper import SmolVLM2Wrapper
+from ai_model import SmolVLM2Wrapper
 
 model = SmolVLM2Wrapper()            # default: SmolVLM2-500M on best device
 model = SmolVLM2Wrapper(ModelConfig(device="cpu", low_memory=True))
@@ -363,11 +367,11 @@ model.unload()  # free GPU/RAM
 
 ### Image manipulation
 
-All functions in `smolvlm2_wrapper.image.manipulation` accept and return
+All functions in `ai_model.image.manipulation` accept and return
 `PIL.Image.Image` objects and never mutate inputs.
 
 ```python
-from smolvlm2_wrapper.image.manipulation import *
+from ai_model.image.manipulation import *
 
 img = resize(img, width=640, height=480)
 img = crop(img, left=0, top=0, right=200, bottom=200)
@@ -388,7 +392,7 @@ img = denoise(img, size=3)               # median filter
 
 
 ```python
-from smolvlm2_wrapper.image.mask import *
+from ai_model.image.mask import *
 
 mask = create_rect_mask(w, h, (left, top, right, bottom))
 mask = create_circular_mask(w, h, center=(cx, cy), radius=r)
@@ -406,7 +410,7 @@ black (0) = background / leave unchanged.
 ### Inpainting, outpainting, healing
 
 ```python
-from smolvlm2_wrapper.image.inpaint import inpaint, outpaint, heal
+from ai_model.image.inpaint import inpaint, outpaint, heal
 
 # Fill the masked region using surrounding pixels
 result = inpaint(image, mask)
@@ -452,8 +456,8 @@ result = (
 # model-powered methods (require model=...)
 caption  = proc.load("photo.jpg").caption(style="detailed")
 
-from smolvlm2_wrapper.video.manipulation import *
-from smolvlm2_wrapper.video.utils import sample_frames, frames_to_gif, add_audio
+from ai_model.video.manipulation import *
+from ai_model.video.utils import sample_frames, frames_to_gif, add_audio
 
 frames = sample_frames("clip.mp4", n=8)         # evenly sampled frames
 frames = trim_frames(frames, start=10, end=50)
@@ -472,7 +476,7 @@ add_audio("silent.mp4", "music.mp3", "final.mp4")  # requires ffmpeg
 ### VideoProcessor (chainable)
 
 ```python
-from smolvlm2_wrapper import SmolVLM2Wrapper, VideoProcessor
+from ai_model import SmolVLM2Wrapper, VideoProcessor
 
 proc = VideoProcessor(model=SmolVLM2Wrapper())
 
@@ -502,7 +506,7 @@ captions = proc.load("clip.mp4").sample(16).caption_frames(every_n=4)
 ### Text & prompt utilities
 
 ```python
-from smolvlm2_wrapper.text.prompts import (
+from ai_model.text.prompts import (
     build_caption_prompt,
     build_vqa_prompt,
     build_enhancement_prompt,
@@ -527,8 +531,8 @@ print(t.format(lang="French", text="Hello world"))
 ### TextProcessor
 
 ```python
-from smolvlm2_wrapper import SmolVLM2Wrapper
-from smolvlm2_wrapper.text.processor import TextProcessor
+from ai_model import SmolVLM2Wrapper
+from ai_model.text.processor import TextProcessor
 
 tp = TextProcessor(model=SmolVLM2Wrapper())
 
@@ -562,7 +566,7 @@ the context `dict`, must return an updated context `dict`, and must not
 return `None`.
 
 ```python
-from smolvlm2_wrapper.workflows.base import Workflow, Step
+from ai_model.workflows.base import Workflow, Step
 
 wf = Workflow(name="my_pipeline")
 
@@ -600,7 +604,7 @@ result = combined.run(initial_ctx)
 | `VideoEditWorkflow` | load → trim → resize → effect → save → (describe) | `video_path`, `output_path`, opt: `trim_start`, `trim_end`, `width`, `height`, `effect`, `fps` |
 
 ```python
-from smolvlm2_wrapper.workflows.examples import PhotoEnhancementWorkflow
+from ai_model.workflows.examples import PhotoEnhancementWorkflow
 
 wf = PhotoEnhancementWorkflow(model=SmolVLM2Wrapper())
 result = wf.run({
@@ -617,8 +621,8 @@ print(result["caption"])
 ### Device & I/O utilities
 
 ```python
-from smolvlm2_wrapper.utils.device import DeviceManager
-from smolvlm2_wrapper.utils.io import load_image, save_image, load_video, save_video
+from ai_model.utils.device import DeviceManager
+from ai_model.utils.io import load_image, save_image, load_video, save_video
 
 # device
 dm = DeviceManager("auto")    # "auto" | "cuda" | "mps" | "cpu"
@@ -753,8 +757,8 @@ Video file
 Sub-class `BaseModelWrapper` with two methods:
 
 ```python
-from smolvlm2_wrapper.core.model import BaseModelWrapper
-from smolvlm2_wrapper.core.config import ModelConfig
+from ai_model.core.model import BaseModelWrapper
+from ai_model.core.config import ModelConfig
 
 class LLaVAWrapper(BaseModelWrapper):
     DEFAULT_CONFIG = ModelConfig(model_id="llava-hf/llava-1.5-7b-hf")
@@ -790,8 +794,8 @@ wf    = PhotoEnhancementWorkflow(model=model)
 ## Low-power device tips
 
 ```python
-from smolvlm2_wrapper import SmolVLM2Wrapper
-from smolvlm2_wrapper.core.config import ModelConfig
+from ai_model import SmolVLM2Wrapper
+from ai_model.core.config import ModelConfig
 
 # Raspberry Pi / Jetson Nano / CPU-only server
 model = SmolVLM2Wrapper(ModelConfig(
@@ -843,7 +847,7 @@ All tests run without downloading model weights.
 ## Project structure
 
 ```
-smolvlm2_wrapper/
+ai_model/
 ├── __init__.py            top-level re-exports
 ├── core/
 │   ├── config.py          ModelConfig dataclass
