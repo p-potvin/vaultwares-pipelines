@@ -6,7 +6,7 @@ from typing import Dict, Any, Optional
 from pydantic import BaseModel, Field
 
 class SharedContext(BaseModel):
-    workflow_id: str = Field(..., description="Unique identifier for the workflow")
+    workflow_id: str = Field(default="", description="Unique identifier for the workflow")
     agents: Dict[str, Any] = Field(default_factory=dict, description="Agent-specific state/context")
     data: Dict[str, Any] = Field(default_factory=dict, description="Shared data accessible to all agents")
     errors: Optional[list] = Field(default_factory=list, description="Centralized error log")

@@ -4,8 +4,8 @@ Handles validation, compliance, and event publishing.
 """
 from typing import Any, Dict
 from ai_model.shared_context import SharedContext
-from ai_model.validation_utils import ValidationUtils
-from ai_model.event_bus import EventBus
+import ai_model.validation_utils as validation_utils
+import ai_model.event_bus as event_bus
 
 import random
 import string
@@ -21,14 +21,14 @@ class WorkflowExportAgent:
 
     def export_to_comfyui(self, python_workflow: Dict[str, Any]) -> Dict[str, Any]:
         # Validate input (assume a schema exists elsewhere)
-        errors = ValidationUtils.validate_context(dict, python_workflow)  # Replace 'dict' with actual schema
+        errors = validation_utils.ValidationUtils.validate_context(dict, python_workflow)  # Replace 'dict' with actual schema
         if errors:
             for err in errors:
-                ValidationUtils.report_error(self.shared_context, 'workflow_export', err)
-            EventBus.publish('error', {'agent': 'workflow_export', 'errors': errors})
+                validation_utils.ValidationUtils.report_error(self.shared_context, 'workflow_export', err)
+            event_bus.EventBus.publish('error', {'agent': 'workflow_export', 'errors': errors})
             return {'success': False, 'errors': errors}
         # Dummy conversion logic (replace with real implementation)
         comfyui_workflow = {'nodes': [], 'edges': [], 'meta': {}}
         # ... conversion logic here ...
-        EventBus.publish('export', {'agent': 'workflow_export', 'status': 'success'})
+        event_bus.EventBus.publish('export', {'agent': 'workflow_export', 'status': 'success'})
         return {'success': True, 'comfyui_workflow': comfyui_workflow}

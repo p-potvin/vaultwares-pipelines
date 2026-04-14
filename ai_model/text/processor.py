@@ -127,7 +127,7 @@ class TextProcessor(ExtrovertAgent):
         self.update_status(AgentStatus.WORKING)
         self._require_model()
         full_prompt = build_video_description_prompt(focus)
-        res = self._model.generate(full_prompt, images=frames, **kwargs)
+        res = self._model.generate(full_prompt, videos=[frames], **kwargs)
         self.update_status(AgentStatus.WAITING_FOR_INPUT)
         return res
     def batch_caption(

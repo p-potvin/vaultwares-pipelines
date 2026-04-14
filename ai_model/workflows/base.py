@@ -135,6 +135,11 @@ class Workflow(ExtrovertAgent):
             start_t = time.time()
             try:
                 ctx = step.fn(ctx)
+                if ctx is None:
+                    raise RuntimeError(
+                        f"Step {step.name!r} returned None.  "
+                        "Each step must return the updated context dict."
+                    )
             except Exception as e:
                 self.update_status(AgentStatus.WAITING_FOR_INPUT)
                 raise RuntimeError(f"Step '{step.name}' failed: {e}") from e
@@ -144,31 +149,6 @@ class Workflow(ExtrovertAgent):
 
         logger.info("[%s] Done.", self.name)
         self.update_status(AgentStatus.WAITING_FOR_INPUT)
-        return ctx
-        total_start = time.perf_counter()
-
-        from ai_model.compliance import check_compliance
-        for step in self._steps:
-            t0 = time.perf_counter()
-            logger.debug("[%s] Running step: %s", self.name, step.name)
-            try:
-                ctx = step.fn(ctx)
-                if ctx is None:
-                    raise RuntimeError(
-                        f"Step {step.name!r} returned None.  "
-                        "Each step must return the updated context dict."
-                    )
-                # Compliance check after each step
-                check_compliance(ctx)
-            except Exception as exc:
-                raise RuntimeError(
-                    f"[{self.name}] Step {step.name!r} failed: {exc}"
-                ) from exc
-            elapsed = time.perf_counter() - t0
-            logger.debug("[%s] Step %s done in %.2fs", self.name, step.name, elapsed)
-
-        total = time.perf_counter() - total_start
-        logger.info("[%s] Completed in %.2fs", self.name, total)
         return ctx
 
     # ------------------------------------------------------------------ #

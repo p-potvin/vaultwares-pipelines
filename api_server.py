@@ -6,8 +6,9 @@ from fastapi.responses import HTMLResponse
 import os
 import json
 from threading import Lock
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
+from uuid import uuid4
 
 import asyncio
 from dotenv import load_dotenv
@@ -15,9 +16,12 @@ from db import init_db, close_db
 from tortoise import Tortoise
 import logging
 
+# Load .env before reading environment-backed settings.
+load_dotenv()
+
 # --- Configurable Settings ---
 AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "1") == "1"
-DEFAULT_MODELS_DIR = os.environ.get("DEFAULT_MODELS_DIR")
+DEFAULT_MODELS_DIR = os.environ.get("DEFAULT_MODELS_DIR") or os.environ.get("MODELS_DIR")
 
 
 # --- Logging Setup ---
@@ -40,11 +44,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-security = HTTPBasic()
+security = HTTPBasic(auto_error=False)
 
-def check_auth(credentials: HTTPBasicCredentials = Depends(security)):
+def check_auth(credentials: Optional[HTTPBasicCredentials] = Depends(security)):
     if not AUTH_ENABLED:
         return
+    if credentials is None:
+        raise HTTPException(status_code=401, detail="Missing credentials")
     # Placeholder: Replace with real user/pass check
     if credentials.username != "admin" or credentials.password != "admin":
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -54,9 +60,34 @@ class Workflow(BaseModel):
     id: str
     name: str
     category: Optional[str] = None
-    steps: Optional[list] = []
-    pinned: Optional[bool] = False
-    favorite: Optional[bool] = False
+    description: Optional[str] = None
+    steps: list = Field(default_factory=list)
+    pinned: bool = False
+    pin: Optional[bool] = None
+    favorite: bool = False
+    lastRun: Optional[str] = None
+
+class WorkflowCreateRequest(BaseModel):
+    id: Optional[str] = None
+    name: str
+    category: Optional[str] = None
+    description: Optional[str] = None
+    steps: list = Field(default_factory=list)
+    pinned: bool = False
+    pin: Optional[bool] = None
+    favorite: bool = False
+    lastRun: Optional[str] = None
+
+class WorkflowUpdateRequest(BaseModel):
+    id: Optional[str] = None
+    name: Optional[str] = None
+    category: Optional[str] = None
+    description: Optional[str] = None
+    steps: Optional[list] = None
+    pinned: Optional[bool] = None
+    pin: Optional[bool] = None
+    favorite: Optional[bool] = None
+    lastRun: Optional[str] = None
 
 class WorkflowsExportRequest(BaseModel):
     ids: List[str]
@@ -65,7 +96,7 @@ class WorkflowsBackupRequest(BaseModel):
     pass
 
 class WorkflowsRestoreRequest(BaseModel):
-    data: List[Workflow]
+    data: list | dict
 
 class WorkflowPinRequest(BaseModel):
     id: str
@@ -78,6 +109,26 @@ class WorkflowFavoriteRequest(BaseModel):
 class WorkflowRunRequest(BaseModel):
     id: str
     mode: str  # 'local' or 'nim'
+
+class ConfigUpdateRequest(BaseModel):
+    modelsDir: Optional[str] = None
+    preferredStorageProvider: Optional[str] = None
+    apiMode: Optional[str] = None
+    apiBase: Optional[str] = None
+    themeIndex: Optional[int] = None
+    runtimeProvider: Optional[str] = None
+    localBridgeUrl: Optional[str] = None
+    localComfyUrl: Optional[str] = None
+    saveDirectory: Optional[str] = None
+    facefusionCommand: Optional[str] = None
+    scannedModels: Optional[dict] = None
+    flowModelSelections: Optional[dict] = None
+    updatedAt: Optional[str] = None
+
+class ModelsDirRequest(BaseModel):
+    dir_path: Optional[str] = None
+    models_dir: Optional[str] = None
+    modelsDir: Optional[str] = None
 
 # --- Persistent JSON Storage ---
 VAULTWARES_HOME_CSS = """
@@ -130,11 +181,103 @@ h1 { font-size: 2.5rem; margin: 24px 0 8px 0; letter-spacing: 2px; }
 }
 """
 
-WORKFLOWS_FILE = os.environ.get("WORKFLOWS_FILE", "workflows.json")  # This will be removed in favor of DB storage
-FRONTEND_URL = "http://localhost:8001" 
-API_KEY_REG_URL = "http://localhost:8001/register"
+WORKFLOWS_FILE = os.environ.get("WORKFLOWS_FILE", "workflows.json")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:5173")
+API_KEY_REG_URL = os.environ.get("API_KEY_REG_URL", f"{FRONTEND_URL.rstrip('/')}/register")
 
 _storage_lock = Lock()
+APP_CONFIG = {
+    "modelsDir": DEFAULT_MODELS_DIR or "",
+    "preferredStorageProvider": "other",
+    "apiMode": "remote-with-local-fallback",
+    "apiBase": "",
+    "themeIndex": 0,
+    "runtimeProvider": "local-bridge" if DEFAULT_MODELS_DIR else "browser-local",
+    "localBridgeUrl": "http://127.0.0.1:8484",
+    "localComfyUrl": "http://127.0.0.1:8188",
+    "saveDirectory": "",
+    "facefusionCommand": "facefusion",
+    "scannedModels": {
+        "scannedAt": "",
+        "source": "none",
+        "modelsDir": DEFAULT_MODELS_DIR or "",
+        "warnings": [],
+        "categories": {
+            "checkpoints": [],
+            "loras": [],
+            "insightface": [],
+            "hyperswap": [],
+            "reactorFaces": [],
+            "facerestoreModels": [],
+            "ultralytics": [],
+            "sams": [],
+        },
+    },
+    "flowModelSelections": {
+        "imageCaptioning": {"captionModel": "", "captionAdapter": ""},
+        "loraTraining": {"baseModel": ""},
+        "videoFaceSwap": {
+            "swapModel": "",
+            "alternateSwapModel": "",
+            "faceModel": "",
+            "restoreModel": "",
+            "detectorModel": "",
+        },
+    },
+}
+
+def _next_workflow_id() -> str:
+    return f"wf-{uuid4().hex[:12]}"
+
+def _workflow_pin_value(pin: Optional[bool], pinned: Optional[bool]) -> bool:
+    if pin is not None:
+        return bool(pin)
+    if pinned is not None:
+        return bool(pinned)
+    return False
+
+def _workflow_to_dict(workflow: Workflow) -> dict:
+    pin_value = _workflow_pin_value(workflow.pin, workflow.pinned)
+    return {
+        "id": workflow.id,
+        "name": workflow.name,
+        "category": workflow.category,
+        "description": workflow.description,
+        "steps": workflow.steps or [],
+        "pinned": pin_value,
+        "favorite": bool(workflow.favorite),
+        "lastRun": workflow.lastRun,
+    }
+
+def _dict_to_workflow(data: dict) -> Workflow:
+    pin_value = _workflow_pin_value(data.get("pin"), data.get("pinned"))
+    return Workflow(
+        id=data.get("id", _next_workflow_id()),
+        name=data.get("name", "Untitled workflow"),
+        category=data.get("category"),
+        description=data.get("description"),
+        steps=data.get("steps") or [],
+        pinned=pin_value,
+        pin=pin_value,
+        favorite=bool(data.get("favorite", False)),
+        lastRun=data.get("lastRun"),
+    )
+
+def _load_workflows_from_file() -> List[Workflow]:
+    with _storage_lock:
+        if not os.path.exists(WORKFLOWS_FILE):
+            return []
+        with open(WORKFLOWS_FILE, "r", encoding="utf-8") as handle:
+            raw = json.load(handle)
+    if not isinstance(raw, list):
+        return []
+    return [_dict_to_workflow(item) for item in raw if isinstance(item, dict)]
+
+def _save_workflows_to_file(workflows: List[Workflow]) -> None:
+    serialized = [_workflow_to_dict(workflow) for workflow in workflows]
+    with _storage_lock:
+        with open(WORKFLOWS_FILE, "w", encoding="utf-8") as handle:
+            json.dump(serialized, handle, indent=2)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -164,7 +307,6 @@ def root():
 
 
 # --- DB Setup ---
-load_dotenv()
 from tortoise import fields, models
 from tortoise.exceptions import DoesNotExist
 DB_URL = os.getenv("DB_URL", "postgres://postgres:postgres@localhost:5432/vaultwares")
@@ -181,13 +323,17 @@ class WorkflowDB(models.Model):
         table = "workflows"
 
 def workflowdb_to_pydantic(wf: WorkflowDB) -> Workflow:
+    pin_value = bool(wf.pinned)
     return Workflow(
         id=wf.id,
         name=wf.name,
         category=wf.category,
+        description=None,
         steps=wf.steps or [],
-        pinned=wf.pinned,
-        favorite=wf.favorite
+        pinned=pin_value,
+        pin=pin_value,
+        favorite=wf.favorite,
+        lastRun=None,
     )
 
 
@@ -216,119 +362,213 @@ async def shutdown_event():
 
 # --- Endpoints ---
 
-def ensure_tortoise_initialized():
-    if not _tortoise_initialized or not Tortoise._inited:
-        logger.error("Tortoise ORM is not initialized. Cannot perform DB operations.")
-        raise HTTPException(status_code=500, detail="Database not initialized.")
+def db_available() -> bool:
+    return bool(_tortoise_initialized and Tortoise._inited)
 
 @app.get("/workflows", response_model=List[Workflow])
 async def list_workflows(credentials: HTTPBasicCredentials = Depends(check_auth)):
-    ensure_tortoise_initialized()
-    workflows = await WorkflowDB.all()
-    return [workflowdb_to_pydantic(wf) for wf in workflows]
+    if db_available():
+        workflows = await WorkflowDB.all()
+        return [workflowdb_to_pydantic(wf) for wf in workflows]
+    return _load_workflows_from_file()
 
 
 @app.post("/workflows", response_model=Workflow)
-async def create_workflow(wf: Workflow, credentials: HTTPBasicCredentials = Depends(check_auth)):
-    ensure_tortoise_initialized()
-    obj = await WorkflowDB.create(
-        id=wf.id,
+async def create_workflow(wf: WorkflowCreateRequest, credentials: HTTPBasicCredentials = Depends(check_auth)):
+    workflow_id = wf.id or _next_workflow_id()
+    pin_value = _workflow_pin_value(wf.pin, wf.pinned)
+    created = Workflow(
+        id=workflow_id,
         name=wf.name,
         category=wf.category,
-        steps=wf.steps,
-        pinned=wf.pinned,
-        favorite=wf.favorite
+        description=wf.description,
+        steps=wf.steps or [],
+        pinned=pin_value,
+        pin=pin_value,
+        favorite=wf.favorite,
+        lastRun=wf.lastRun,
     )
-    return workflowdb_to_pydantic(obj)
+
+    if db_available():
+        obj = await WorkflowDB.create(
+            id=created.id,
+            name=created.name,
+            category=created.category,
+            steps=created.steps,
+            pinned=created.pinned,
+            favorite=created.favorite,
+        )
+        return workflowdb_to_pydantic(obj)
+
+    workflows = _load_workflows_from_file()
+    workflows.append(created)
+    _save_workflows_to_file(workflows)
+    return created
 
 
 @app.put("/workflows/{id}", response_model=Workflow)
-async def update_workflow(id: str, wf: Workflow, credentials: HTTPBasicCredentials = Depends(check_auth)):
-    ensure_tortoise_initialized()
-    try:
-        obj = await WorkflowDB.get(id=id)
-    except DoesNotExist:
-        raise HTTPException(status_code=404, detail="Workflow not found")
-    obj.name = wf.name
-    obj.category = wf.category
-    obj.steps = wf.steps
-    obj.pinned = wf.pinned
-    obj.favorite = wf.favorite
-    await obj.save()
-    return workflowdb_to_pydantic(obj)
+async def update_workflow(id: str, wf: WorkflowUpdateRequest, credentials: HTTPBasicCredentials = Depends(check_auth)):
+    if db_available():
+        try:
+            obj = await WorkflowDB.get(id=id)
+        except DoesNotExist:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+        if wf.name is not None:
+            obj.name = wf.name
+        if wf.category is not None:
+            obj.category = wf.category
+        if wf.steps is not None:
+            obj.steps = wf.steps
+        if wf.favorite is not None:
+            obj.favorite = wf.favorite
+        pin_value = _workflow_pin_value(wf.pin, wf.pinned)
+        if wf.pin is not None or wf.pinned is not None:
+            obj.pinned = pin_value
+        await obj.save()
+        return workflowdb_to_pydantic(obj)
+
+    workflows = _load_workflows_from_file()
+    for index, item in enumerate(workflows):
+        if item.id != id:
+            continue
+        updated = Workflow(
+            id=id,
+            name=wf.name if wf.name is not None else item.name,
+            category=wf.category if wf.category is not None else item.category,
+            description=wf.description if wf.description is not None else item.description,
+            steps=wf.steps if wf.steps is not None else item.steps,
+            pinned=_workflow_pin_value(wf.pin, wf.pinned) if (wf.pin is not None or wf.pinned is not None) else item.pinned,
+            pin=_workflow_pin_value(wf.pin, wf.pinned) if (wf.pin is not None or wf.pinned is not None) else item.pinned,
+            favorite=wf.favorite if wf.favorite is not None else item.favorite,
+            lastRun=wf.lastRun if wf.lastRun is not None else item.lastRun,
+        )
+        workflows[index] = updated
+        _save_workflows_to_file(workflows)
+        return updated
+
+    raise HTTPException(status_code=404, detail="Workflow not found")
 
 
 @app.delete("/workflows/{id}")
 async def delete_workflow(id: str, credentials: HTTPBasicCredentials = Depends(check_auth)):
-    ensure_tortoise_initialized()
-    deleted = await WorkflowDB.filter(id=id).delete()
-    if not deleted:
+    if db_available():
+        deleted = await WorkflowDB.filter(id=id).delete()
+        if not deleted:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+        return {"ok": True}
+
+    workflows = _load_workflows_from_file()
+    filtered = [item for item in workflows if item.id != id]
+    if len(filtered) == len(workflows):
         raise HTTPException(status_code=404, detail="Workflow not found")
+    _save_workflows_to_file(filtered)
     return {"ok": True}
 
 
 @app.post("/workflows/export")
 async def export_workflows(req: WorkflowsExportRequest, credentials: HTTPBasicCredentials = Depends(check_auth)):
-    ensure_tortoise_initialized()
-    workflows = await WorkflowDB.filter(id__in=req.ids)
-    return [workflowdb_to_pydantic(wf) for wf in workflows]
+    if db_available():
+        workflows = await WorkflowDB.filter(id__in=req.ids)
+        return [workflowdb_to_pydantic(wf) for wf in workflows]
+    workflows = _load_workflows_from_file()
+    if not req.ids:
+        return workflows
+    target_ids = set(req.ids)
+    return [workflow for workflow in workflows if workflow.id in target_ids]
 
 
 @app.post("/workflows/backup")
 async def backup_workflows(_: WorkflowsBackupRequest, credentials: HTTPBasicCredentials = Depends(check_auth)):
-    ensure_tortoise_initialized()
-    workflows = await WorkflowDB.all()
-    return [workflowdb_to_pydantic(wf) for wf in workflows]
+    if db_available():
+        workflows = await WorkflowDB.all()
+        return [workflowdb_to_pydantic(wf) for wf in workflows]
+    return _load_workflows_from_file()
 
 
 @app.post("/workflows/restore")
 async def restore_workflows(req: WorkflowsRestoreRequest, credentials: HTTPBasicCredentials = Depends(check_auth)):
-    ensure_tortoise_initialized()
-    for wf in req.data:
-        await WorkflowDB.update_or_create(
-            defaults={
-                "name": wf.name,
-                "category": wf.category,
-                "steps": wf.steps,
-                "pinned": wf.pinned,
-                "favorite": wf.favorite
-            },
-            id=wf.id
-        )
+    items = req.data
+    if isinstance(items, dict):
+        candidate = items.get("workflows", [])
+        items = candidate if isinstance(candidate, list) else []
+    workflows_in = [_dict_to_workflow(item) for item in items if isinstance(item, dict)]
+
+    if db_available():
+        for wf in workflows_in:
+            await WorkflowDB.update_or_create(
+                defaults={
+                    "name": wf.name,
+                    "category": wf.category,
+                    "steps": wf.steps,
+                    "pinned": wf.pinned,
+                    "favorite": wf.favorite,
+                },
+                id=wf.id,
+            )
+        return {"ok": True}
+
+    existing = {workflow.id: workflow for workflow in _load_workflows_from_file()}
+    for workflow in workflows_in:
+        existing[workflow.id] = workflow
+    _save_workflows_to_file(list(existing.values()))
     return {"ok": True}
 
 
 @app.post("/workflows/pin")
 async def pin_workflow(req: WorkflowPinRequest, credentials: HTTPBasicCredentials = Depends(check_auth)):
-    ensure_tortoise_initialized()
-    try:
-        obj = await WorkflowDB.get(id=req.id)
-    except DoesNotExist:
-        raise HTTPException(status_code=404, detail="Workflow not found")
-    obj.pinned = req.pin
-    await obj.save()
-    return workflowdb_to_pydantic(obj)
+    if db_available():
+        try:
+            obj = await WorkflowDB.get(id=req.id)
+        except DoesNotExist:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+        obj.pinned = req.pin
+        await obj.save()
+        return workflowdb_to_pydantic(obj)
+
+    workflows = _load_workflows_from_file()
+    for index, item in enumerate(workflows):
+        if item.id != req.id:
+            continue
+        updated = item.model_copy(update={"pinned": req.pin, "pin": req.pin})
+        workflows[index] = updated
+        _save_workflows_to_file(workflows)
+        return updated
+    raise HTTPException(status_code=404, detail="Workflow not found")
 
 
 @app.post("/workflows/favorite")
 async def favorite_workflow(req: WorkflowFavoriteRequest, credentials: HTTPBasicCredentials = Depends(check_auth)):
-    ensure_tortoise_initialized()
-    try:
-        obj = await WorkflowDB.get(id=req.id)
-    except DoesNotExist:
-        raise HTTPException(status_code=404, detail="Workflow not found")
-    obj.favorite = req.favorite
-    await obj.save()
-    return workflowdb_to_pydantic(obj)
+    if db_available():
+        try:
+            obj = await WorkflowDB.get(id=req.id)
+        except DoesNotExist:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+        obj.favorite = req.favorite
+        await obj.save()
+        return workflowdb_to_pydantic(obj)
+
+    workflows = _load_workflows_from_file()
+    for index, item in enumerate(workflows):
+        if item.id != req.id:
+            continue
+        updated = item.model_copy(update={"favorite": req.favorite})
+        workflows[index] = updated
+        _save_workflows_to_file(workflows)
+        return updated
+    raise HTTPException(status_code=404, detail="Workflow not found")
 
 
 @app.post("/workflows/run")
 async def run_workflow(req: WorkflowRunRequest, credentials: HTTPBasicCredentials = Depends(check_auth)):
-    ensure_tortoise_initialized()
-    try:
-        obj = await WorkflowDB.get(id=req.id)
-    except DoesNotExist:
-        raise HTTPException(status_code=404, detail="Workflow not found")
+    if db_available():
+        try:
+            await WorkflowDB.get(id=req.id)
+        except DoesNotExist:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+    else:
+        workflows = _load_workflows_from_file()
+        if not any(item.id == req.id for item in workflows):
+            raise HTTPException(status_code=404, detail="Workflow not found")
     # NIM VM integration placeholder
     if req.mode == "nim":
         return {"id": req.id, "mode": req.mode, "status": "nim_vm_placeholder", "message": "NIM VM integration not yet implemented."}
@@ -355,16 +595,35 @@ def upload_other(credentials: HTTPBasicCredentials = Depends(check_auth)):
     # Placeholder for other storage providers
     return {"status": "placeholder", "message": "Other storage provider upload not implemented."}
 
+# --- App Config ---
+@app.get("/config")
+def get_config(credentials: HTTPBasicCredentials = Depends(check_auth)):
+    return APP_CONFIG
+
+@app.post("/config")
+def update_config(req: ConfigUpdateRequest, credentials: HTTPBasicCredentials = Depends(check_auth)):
+    payload = req.model_dump(exclude_none=True)
+    APP_CONFIG.update(payload)
+    if "modelsDir" in payload:
+        global DEFAULT_MODELS_DIR
+        DEFAULT_MODELS_DIR = payload["modelsDir"]
+    return APP_CONFIG
+
 # --- Models Directory Config ---
 @app.get("/config/models-dir")
 def get_models_dir(credentials: HTTPBasicCredentials = Depends(check_auth)):
-    return {"models_dir": DEFAULT_MODELS_DIR}
+    value = APP_CONFIG.get("modelsDir") or DEFAULT_MODELS_DIR or ""
+    return {"models_dir": value, "dir_path": value, "modelsDir": value}
 
 @app.post("/config/models-dir")
-def set_models_dir(dir_path: str, credentials: HTTPBasicCredentials = Depends(check_auth)):
+def set_models_dir(req: ModelsDirRequest, credentials: HTTPBasicCredentials = Depends(check_auth)):
     global DEFAULT_MODELS_DIR
-    DEFAULT_MODELS_DIR = dir_path
-    return {"models_dir": DEFAULT_MODELS_DIR}
+    resolved = req.dir_path or req.models_dir or req.modelsDir
+    if resolved is None:
+        raise HTTPException(status_code=422, detail="Expected one of dir_path, models_dir, or modelsDir")
+    DEFAULT_MODELS_DIR = resolved
+    APP_CONFIG["modelsDir"] = resolved
+    return {"models_dir": DEFAULT_MODELS_DIR, "dir_path": DEFAULT_MODELS_DIR, "modelsDir": DEFAULT_MODELS_DIR}
 
 
 
@@ -372,4 +631,4 @@ def set_models_dir(dir_path: str, credentials: HTTPBasicCredentials = Depends(ch
 # --- Script Entrypoint ---
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api_server:app", host="127.0.0.1", port=8001, reload=True)
+    uvicorn.run("api_server:app", host="127.0.0.1", port=9001, reload=True)
