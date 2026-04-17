@@ -1,0 +1,61 @@
+# Example Nginx reverse-proxy config for Brume 2 (OpenWrt).
+#
+# Goal:
+# - Brume terminates TLS for api.vaultwares.com
+# - Brume rate-limits and becomes the choke-point for abuse controls
+# - Brume proxies to the API host on LAN: http://10.0.0.24:9001
+# - Brume injects X-VW-Gateway-Secret so the API can reject direct/bypass traffic
+#
+# You still need:
+# - real cert/key paths (via luci-app-acme or your preferred ACME client)
+# - a DNS A record for api.vaultwares.com pointing to your WAN IP
+# - port forwards 80/443 -> Brume 2
+#
+# Replace: <GATEWAY_SHARED_SECRET> with the same value used in the API `.env`.
+
+limit_req_zone $binary_remote_addr zone=vaultwares_api:10m rate=5r/s;
+
+server {
+    listen 80;
+    server_name api.vaultwares.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name api.vaultwares.com;
+
+    # --- TLS certs (example paths) ---
+    # ssl_certificate     /etc/acme/api.vaultwares.com/fullchain.pem;
+    # ssl_certificate_key /etc/acme/api.vaultwares.com/privkey.pem;
+
+    # Strict HTTPS (enable HSTS once stable)
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+    # Large uploads (LoRA / checkpoints). Adjust as needed.
+    client_max_body_size 10g;
+
+    # Rate limit (tune as needed)
+    limit_req zone=vaultwares_api burst=40 nodelay;
+
+    location / {
+        proxy_pass http://10.0.0.24:9001;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+
+        # Brume gateway secret injection (API requires it for public clients)
+        proxy_set_header X-VW-Gateway-Secret "<GATEWAY_SHARED_SECRET>";
+
+        # Good defaults for long-running responses (still prefer async jobs + polling)
+        proxy_read_timeout 3600s;
+        proxy_send_timeout 3600s;
+
+        # Stream large uploads to the API host
+        proxy_request_buffering off;
+        proxy_buffering off;
+    }
+}
+
