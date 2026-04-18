@@ -14,6 +14,25 @@
 # Replace: <GATEWAY_SHARED_SECRET> with the same value used in the API `.env`.
 
 limit_req_zone $binary_remote_addr zone=vaultwares_api:10m rate=5r/s;
+limit_req_zone $binary_remote_addr zone=vaultwares_login:10m rate=1r/s;
+
+# Treat Tailscale clients as trusted for gateway filtering (supports scripts without Origin header).
+geo $vw_is_tailscale {
+    default 0;
+    100.64.0.0/10 1;
+    fd7a:115c:a1e0::/48 1;
+}
+
+# Allowlist Vercel app origins (add/remove as needed).
+# Use stable alias domains (e.g. https://vault-flows.vercel.app), not preview URLs.
+map $http_origin $vw_origin_ok {
+    default 0;
+    "https://vault-flows.vercel.app" 1;
+    # "https://dispatch-wares-frontend.vercel.app" 1;
+    # "https://vaultwares-pipelines-frontend.vercel.app" 1;
+    # "https://cultural-rhythm.vercel.app" 1;
+    # "https://glass-ui-preview.vercel.app" 1;
+}
 
 server {
     listen 80;
@@ -38,7 +57,37 @@ server {
     # Rate limit (tune as needed)
     limit_req zone=vaultwares_api burst=40 nodelay;
 
+    # Stricter throttling for login to slow brute force attempts
+    location = /auth/login {
+        limit_req zone=vaultwares_login burst=5 nodelay;
+
+        # Public internet must have an allowed Origin. Tailscale can omit Origin.
+        if ($vw_is_tailscale = 0) {
+            if ($http_origin = "") { return 403; }
+            if ($vw_origin_ok = 0) { return 403; }
+        }
+
+        proxy_pass http://10.0.0.24:9001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-VW-Gateway-Secret "<GATEWAY_SHARED_SECRET>";
+
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_request_buffering off;
+        proxy_buffering off;
+    }
+
     location / {
+        # Public internet must have an allowed Origin. Tailscale can omit Origin.
+        # Later: replace the 403 with a redirect to your Identity Manager registration page.
+        if ($vw_is_tailscale = 0) {
+            if ($http_origin = "") { return 403; }
+            if ($vw_origin_ok = 0) { return 403; }
+        }
+
         proxy_pass http://10.0.0.24:9001;
 
         proxy_set_header Host $host;
@@ -58,4 +107,3 @@ server {
         proxy_buffering off;
     }
 }
-
