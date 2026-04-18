@@ -68,10 +68,23 @@ GATEWAY_SHARED_SECRET=change-me-long-random
 ```
 
 Your gateway must send `X-VW-Gateway-Secret: <secret>` when proxying to the API.
+If you want a different header name:
+```env
+GATEWAY_HEADER_NAME=x-vw-gateway-secret
+```
+
+See `brume2_nginx.conf.example` for an OpenWrt-friendly Nginx starting point (adjust cert paths).
 
 Tailscale networks (defaults to `100.64.0.0/10` and `fd7a:115c:a1e0::/48`):
 ```env
 TAILSCALE_CIDRS=100.64.0.0/10,fd7a:115c:a1e0::/48
+```
+
+When using the Brume gateway over LAN, run the API bound to LAN:
+```env
+API_HOST=0.0.0.0
+API_PORT=9001
+UVICORN_RELOAD=1
 ```
 
 ---

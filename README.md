@@ -115,7 +115,7 @@ You can customize the URLs for the dashboard and API key registration in `api_se
   - `workflows/`: Built-in workflows (photo enhancement, inpainting, video analysis, etc.).
   - `core/`, `image/`, `video/`, `text/`, `utils/`: Core model wrappers, manipulation utilities, and processors.
 
-- **vaultwares-agentciation/**: Social/coordination agents.
+- **vaultwares_agentciation/**: Social/coordination agents.
   - `extrovert_agent.py`: Team awareness, status, and socialization via Redis.
   - `lonely_manager.py`: Project alignment, TODO/roadmap monitoring, and nudges.
   - `base_agent.py`, `enums.py`, etc.: Agent base classes and enums.
@@ -148,12 +148,12 @@ For more details, see in-line code comments and the [agent_manifest.md](agent_ma
 - `ai_model/workflow_export_agent.py` — Export workflows to ComfyUI/Diffusion formats
 - `ai_model/workflows/` — Built-in workflows
 - `ai_model/core/`, `ai_model/image/`, `ai_model/video/`, `ai_model/text/`, `ai_model/utils/` — Core model wrappers, manipulation utilities, and processors
-- `vaultwares-agentciation/extrovert_agent.py` — Team awareness, status, and socialization via Redis
-- `vaultwares-agentciation/lonely_manager.py` — Project alignment, TODO/roadmap monitoring, and nudges
-- `vaultwares-agentciation/base_agent.py` — Agent base classes
-- `vaultwares-agentciation/enums.py`, etc. — enums, and shared utilities
+- `vaultwares_agentciation/extrovert_agent.py` — Team awareness, status, and socialization via Redis
+- `vaultwares_agentciation/lonely_manager.py` — Project alignment, TODO/roadmap monitoring, and nudges
+- `vaultwares_agentciation/base_agent.py` — Agent base classes
+- `vaultwares_agentciation/enums.py`, etc. — enums, and shared utilities
 - `examples/api_server.py` — FastAPI server
-- `vaultwares-agentciation/central_error_logger.py` — Error/event logging with correlationId
+- `vaultwares_agentciation/central_error_logger.py` — Error/event logging with correlationId
 - `examples/workflow_gui_gradio.py` — Quickstart Gradio GUI for workflow execution
 
 ## Example Usage (GUI)
@@ -215,7 +215,7 @@ Pull requests and issues are welcome!
 
 ### ExtrovertAgent
 
-`vaultwares-agentciation.extrovert_agent.ExtrovertAgent`
+`vaultwares_agentciation.extrovert_agent.ExtrovertAgent`
 
 An agent that maintains live team awareness and socialization via Redis. Every user interaction triggers a heartbeat, status update, project re-evaluation, and peer acknowledgement. Includes:
 
@@ -226,7 +226,7 @@ An agent that maintains live team awareness and socialization via Redis. Every u
 
 #### Example
 ```python
-from vaultwares-agentciation.extrovert_agent import ExtrovertAgent
+from vaultwares_agentciation.extrovert_agent import ExtrovertAgent
 agent = ExtrovertAgent("agent-1")
 agent.start()
 print(agent.socialize())
@@ -235,7 +235,7 @@ agent.stop()
 
 ### LonelyManager
 
-`vaultwares-agentciation.lonely_manager.LonelyManager`
+`vaultwares_agentciation.lonely_manager.LonelyManager`
 
 Extends ExtrovertAgent to enforce project alignment and monitor all agents. Features:
 
@@ -246,7 +246,7 @@ Extends ExtrovertAgent to enforce project alignment and monitor all agents. Feat
 
 #### Example
 ```python
-from vaultwares-agentciation.lonely_manager import LonelyManager
+from vaultwares_agentciation.lonely_manager import LonelyManager
 manager = LonelyManager()
 manager.start()
 print(manager.get_project_status_report())

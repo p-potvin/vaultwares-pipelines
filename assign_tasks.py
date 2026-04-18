@@ -8,12 +8,12 @@ import threading
 
 # Add root and submodule to path
 sys.path.append(os.getcwd())
-sys.path.append(os.path.join(os.getcwd(), "vaultwares-agentciation"))
+sys.path.append(os.path.join(os.getcwd(), "vaultwares_agentciation"))
 
 from ai_model import TextProcessor, ImageProcessor, VideoProcessor, Workflow
 import importlib
-LonelyManager = importlib.import_module('vaultwares-agentciation.lonely_manager').LonelyManager
-AgentStatus = importlib.import_module('vaultwares-agentciation.enums').AgentStatus
+LonelyManager = importlib.import_module('vaultwares_agentciation.lonely_manager').LonelyManager
+AgentStatus = importlib.import_module('vaultwares_agentciation.enums').AgentStatus
 
 TASKS_FILE = "TASKS.md"
 

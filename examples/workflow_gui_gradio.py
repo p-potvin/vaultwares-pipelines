@@ -360,17 +360,19 @@ def resource_monitor_gen(duration=0):
             break
         time.sleep(1)
 
-# Workflow runner (runs in a thread, puts outputs/logs in a queue)
 def run_workflow_thread(workflow_name, params, q):
+    """
+    Workflow runner (runs in a thread, puts outputs/logs in a queue).
+
+    To expand for custom workflows: in your workflow function, use
+      model = MODEL_CACHE.get(cache_key)
+      if model is None: ... load model ... MODEL_CACHE.set(cache_key, model)
+    This ensures all local workflows benefit from LRU caching and memory limits.
+    """
     log = lambda msg: q.put(("log", msg))
     wf = WORKFLOWS[workflow_name]
     img, logmsg = wf["run"](params, log)
     q.put(("output", img, logmsg))
-
-    # To expand for custom workflows: in your workflow function, use
-    #   model = MODEL_CACHE.get(cache_key)
-    #   if model is None: ... load model ... MODEL_CACHE.set(cache_key, model)
-    # This ensures all local workflows benefit from LRU caching and memory limits.
 
 # Gradio app
 def gradio_app():
