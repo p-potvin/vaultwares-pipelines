@@ -153,27 +153,31 @@ def outpaint(
     # Edge-extend: blend from image border pixels into fill colour
     if top > 0:
         src_row = np.array(img_rgb.crop((0, 0, ow, 1)), dtype=np.float32)[0]  # (ow, 3)
-        for y in range(top):
-            alpha = y / max(top, 1)
-            canvas_arr[y, left:left + ow] = src_row * (1 - alpha) + fill * alpha
+        alphas = np.arange(top, dtype=np.float32)[:, np.newaxis, np.newaxis] / top
+        canvas_arr[:top, left:left + ow] = (
+            src_row[np.newaxis, :, :] * (1 - alphas) + fill[np.newaxis, np.newaxis, :] * alphas
+        )
 
     if bottom > 0:
         src_row = np.array(img_rgb.crop((0, oh - 1, ow, oh)), dtype=np.float32)[0]  # (ow, 3)
-        for i, y in enumerate(range(top + oh, nh)):
-            alpha = i / max(bottom, 1)
-            canvas_arr[y, left:left + ow] = src_row * (1 - alpha) + fill * alpha
+        alphas = np.arange(bottom, dtype=np.float32)[:, np.newaxis, np.newaxis] / bottom
+        canvas_arr[top + oh:, left:left + ow] = (
+            src_row[np.newaxis, :, :] * (1 - alphas) + fill[np.newaxis, np.newaxis, :] * alphas
+        )
 
     if left > 0:
         src_col = np.array(img_rgb.crop((0, 0, 1, oh)), dtype=np.float32)[:, 0, :]  # (oh, 3)
-        for x in range(left):
-            alpha = x / max(left, 1)
-            canvas_arr[top:top + oh, x] = src_col * (1 - alpha) + fill * alpha
+        alphas = np.arange(left, dtype=np.float32)[np.newaxis, :, np.newaxis] / left
+        canvas_arr[top:top + oh, :left] = (
+            src_col[:, np.newaxis, :] * (1 - alphas) + fill[np.newaxis, np.newaxis, :] * alphas
+        )
 
     if right > 0:
         src_col = np.array(img_rgb.crop((ow - 1, 0, ow, oh)), dtype=np.float32)[:, 0, :]  # (oh, 3)
-        for i, x in enumerate(range(left + ow, nw)):
-            alpha = i / max(right, 1)
-            canvas_arr[top:top + oh, x] = src_col * (1 - alpha) + fill * alpha
+        alphas = np.arange(right, dtype=np.float32)[np.newaxis, :, np.newaxis] / right
+        canvas_arr[top:top + oh, left + ow:] = (
+            src_col[:, np.newaxis, :] * (1 - alphas) + fill[np.newaxis, np.newaxis, :] * alphas
+        )
 
     result = Image.fromarray(np.clip(canvas_arr, 0, 255).astype(np.uint8))
 
