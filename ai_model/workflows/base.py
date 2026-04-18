@@ -29,8 +29,8 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional
 
 import importlib
-ExtrovertAgent = importlib.import_module('vaultwares-agentciation.extrovert_agent').ExtrovertAgent
-AgentStatus = importlib.import_module('vaultwares-agentciation.enums').AgentStatus
+ExtrovertAgent = importlib.import_module('vaultwares_agentciation.extrovert_agent').ExtrovertAgent
+AgentStatus = importlib.import_module('vaultwares_agentciation.enums').AgentStatus
 
 logger = logging.getLogger(__name__)
 

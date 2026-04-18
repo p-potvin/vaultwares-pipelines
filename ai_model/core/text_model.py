@@ -69,7 +69,12 @@ class TextModelWrapper(BaseModelWrapper):
     def _load_model(self) -> None:
         """Load the AutoTokenizer and AutoModelForCausalLM or multimodal model from HuggingFace."""
         import torch
-        from transformers import AutoTokenizer, AutoModelForCausalLM, AutoProcessor, AutoModelForVision2Seq
+        from transformers import (
+            AutoTokenizer,
+            AutoModelForCausalLM,
+            AutoModelForVision2Seq,
+            AutoProcessor
+        )
 
         dtype_map = {
             "float16": torch.float16,

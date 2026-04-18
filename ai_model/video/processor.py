@@ -34,8 +34,8 @@ from PIL import Image
 
 from ai_model.video import manipulation, utils as vid_utils
 import importlib
-ExtrovertAgent = importlib.import_module('vaultwares-agentciation.extrovert_agent').ExtrovertAgent
-AgentStatus = importlib.import_module('vaultwares-agentciation.enums').AgentStatus
+ExtrovertAgent = importlib.import_module('vaultwares_agentciation.extrovert_agent').ExtrovertAgent
+AgentStatus = importlib.import_module('vaultwares_agentciation.enums').AgentStatus
 
 logger = logging.getLogger(__name__)
 

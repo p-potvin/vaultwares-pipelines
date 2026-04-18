@@ -36,8 +36,8 @@ from PIL import Image
 
 from ai_model.image import manipulation, mask as mask_mod, inpaint as inpaint_mod
 import importlib
-ExtrovertAgent = importlib.import_module('vaultwares-agentciation.extrovert_agent').ExtrovertAgent
-AgentStatus = importlib.import_module('vaultwares-agentciation.enums').AgentStatus
+ExtrovertAgent = importlib.import_module('vaultwares_agentciation.extrovert_agent').ExtrovertAgent
+AgentStatus = importlib.import_module('vaultwares_agentciation.enums').AgentStatus
 
 logger = logging.getLogger(__name__)
 
