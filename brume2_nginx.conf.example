@@ -45,8 +45,17 @@ server {
     server_name api.vaultwares.com;
 
     # --- TLS certs (example paths) ---
-    # ssl_certificate     /etc/acme/api.vaultwares.com/fullchain.pem;
-    # ssl_certificate_key /etc/acme/api.vaultwares.com/privkey.pem;
+    # luci-app-acme / acme.sh commonly stores files under:
+    # - /etc/acme/<domain>/fullchain.cer
+    # - /etc/acme/<domain>/<domain>.key
+    #
+    # Some setups use an "_ecc" suffix directory for ECDSA keys:
+    # - /etc/acme/<domain>_ecc/<domain>.cer
+    # - /etc/acme/<domain>_ecc/<domain>.key
+    #
+    # Set these to match your Brume 2 box:
+    # ssl_certificate     /etc/acme/api.vaultwares.com/fullchain.cer;
+    # ssl_certificate_key /etc/acme/api.vaultwares.com/api.vaultwares.com.key;
 
     # Strict HTTPS (enable HSTS once stable)
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;

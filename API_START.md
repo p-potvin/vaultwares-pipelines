@@ -75,6 +75,18 @@ GATEWAY_HEADER_NAME=x-vw-gateway-secret
 
 See `brume2_nginx.conf.example` for an OpenWrt-friendly Nginx starting point (adjust cert paths).
 
+### Brume 2 (OpenWrt) Nginx quick start
+
+1. Copy the example to your Brume (adjust as needed for your Nginx install):
+   - Common locations: `/etc/nginx/conf.d/vaultwares-api.conf` or `/etc/nginx/sites-enabled/vaultwares-api.conf`
+   - Ensure it’s included by your main `/etc/nginx/nginx.conf` (you can verify with `nginx -T`).
+2. Replace `<GATEWAY_SHARED_SECRET>` with the same value used on the API host.
+3. Set `ssl_certificate` / `ssl_certificate_key` to the files created by your ACME client.
+   - `luci-app-acme` / `acme.sh` commonly uses `/etc/acme/<domain>/...` (see comments in `brume2_nginx.conf.example`).
+4. Validate and reload:
+   - `nginx -t`
+   - `/etc/init.d/nginx reload` (or restart if reload isn’t supported)
+
 Tailscale networks (defaults to `100.64.0.0/10` and `fd7a:115c:a1e0::/48`):
 ```env
 TAILSCALE_CIDRS=100.64.0.0/10,fd7a:115c:a1e0::/48
