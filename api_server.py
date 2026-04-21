@@ -27,6 +27,8 @@ from passlib.context import CryptContext
 # Load .env before reading environment-backed settings.
 load_dotenv()
 
+from app.security.ml_kem import VaultMLKEM
+
 # --- Configurable Settings ---
 AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "1") == "1"
 DEFAULT_MODELS_DIR = os.environ.get("DEFAULT_MODELS_DIR") or os.environ.get("MODELS_DIR")
@@ -406,6 +408,13 @@ class LoginResponse(BaseModel):
     token_type: str = "bearer"
     expires_in: int
 
+class PqcHandshakeRequest(BaseModel):
+    client_public_key: str
+
+class PqcHandshakeResponse(BaseModel):
+    server_cipher_text: str
+    algorithm: str = "ML-KEM-768"
+
 class MeResponse(BaseModel):
     username: str
     is_admin: bool = False
@@ -664,6 +673,19 @@ async def shutdown_event():
 
 def db_available() -> bool:
     return bool(_tortoise_initialized and Tortoise._inited)
+
+@app.post("/security/pqc/handshake", response_model=PqcHandshakeResponse)
+async def pqc_handshake(payload: PqcHandshakeRequest):
+    """
+    Experimental PQC Handshake (ML-KEM).
+    """
+    try:
+        result = VaultMLKEM.encapsulate(payload.client_public_key)
+        return PqcHandshakeResponse(
+            server_cipher_text=result["cipher_text"]
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/auth/login", response_model=LoginResponse)
 async def login(payload: LoginRequest, request: Request):
