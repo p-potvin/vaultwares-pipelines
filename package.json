@@ -1,5 +1,5 @@
 {
-  "name": "vaultwares-pipelines-prisma",
+  "name": "vault-server-prisma",
   "private": true,
   "type": "module",
   "scripts": {

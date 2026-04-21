@@ -35,7 +35,7 @@ This API supports:
 Required env vars for JWT:
 ```env
 JWT_SECRET=change-me
-JWT_ISSUER=vaultwares-pipelines
+JWT_ISSUER=vault-server
 JWT_AUDIENCE=vaultwares
 JWT_TTL_SECONDS=900
 ```
@@ -141,6 +141,39 @@ If you run behind a reverse proxy, ensure the API only trusts `X-Forwarded-For` 
 ```env
 TRUSTED_PROXY_CIDRS=127.0.0.1/32,::1/128
 ```
+
+---
+
+## Local TLS with mkcert (recommended for Windows development)
+
+Use mkcert to run the API locally over real HTTPS while keeping the certificates out of git.
+
+### Generate certificates
+
+```powershell
+.\generate_local_tls_certs.ps1
+```
+
+This creates:
+
+- `.certs/localhost+127.0.0.1.pem`
+- `.certs/localhost+127.0.0.1-key.pem`
+
+### Start the local HTTPS API
+
+```powershell
+.\start_https_dev.ps1
+```
+
+Recommended local frontend origin:
+
+- `https://localhost:5174`
+
+Recommended local API base:
+
+- `https://localhost:8000`
+
+If you need a different port, set `API_PORT` before running the script.
 
 ---
 

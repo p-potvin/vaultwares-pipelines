@@ -34,7 +34,7 @@ AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "1") == "1"
 DEFAULT_MODELS_DIR = os.environ.get("DEFAULT_MODELS_DIR") or os.environ.get("MODELS_DIR")
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "")
-JWT_ISSUER = os.environ.get("JWT_ISSUER", "vaultwares-pipelines")
+JWT_ISSUER = os.environ.get("JWT_ISSUER", "vault-server")
 JWT_AUDIENCE = os.environ.get("JWT_AUDIENCE", "vaultwares")
 JWT_TTL_SECONDS = int(os.environ.get("JWT_TTL_SECONDS", "900"))
 API_KEY_PEPPER = os.environ.get("API_KEY_PEPPER") or JWT_SECRET

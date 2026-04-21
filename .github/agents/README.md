@@ -1,7 +1,7 @@
 # Skills snapshot
 
 Generated: 2026-04-13 01:40:30 -04:00
-Repo: C:\Users\Administrator\Desktop\Github Repos\Projects\vaultwares-pipelines
+Repo: C:\Users\Administrator\Desktop\Github Repos\Projects\vault-server
 
 Copied skill definition files: 42
 
