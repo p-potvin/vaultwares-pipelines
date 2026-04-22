@@ -7,3 +7,8 @@
 **Vulnerability:** Subprocesses generating Git commits used string formatting to construct commit messages and passed them to `git commit -m`.
 **Learning:** While `shell=False` protects against basic command injection (e.g. `&& rm -rf /`), parameter injection or argument confusion is still possible if untrusted input slips in.
 **Prevention:** Use standard input streams for passing untrusted strings as data rather than command arguments. In the context of `git commit`, this means using `-F -` and passing the message via `subprocess.run(..., input=message_string)`.
+
+## $(date +%Y-%m-%d) - X-Forwarded-For IP Spoofing Prevention
+**Vulnerability:** The `_get_client_ip` function parsed the leftmost IP from the `X-Forwarded-For` header. Because clients can easily spoof this header, an attacker could set it to a trusted internal IP (like `127.0.0.1`), effectively bypassing `_is_trusted_client_ip` authorization checks intended only for internal services.
+**Learning:** In scenarios behind trusted reverse proxies (like Nginx), the proxy *appends* the actual client IP to the `X-Forwarded-For` chain. The leftmost IP is always untrusted user input and can be anything.
+**Prevention:** Always extract the rightmost IP address from the `X-Forwarded-For` header (or iterate right-to-left stopping at the first untrusted proxy) to ensure you are validating the true connection IP, preventing IP spoofing vulnerabilities.
