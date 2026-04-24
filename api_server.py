@@ -27,12 +27,14 @@ from passlib.context import CryptContext
 # Load .env before reading environment-backed settings.
 load_dotenv()
 
+from app.security.ml_kem import VaultMLKEM
+
 # --- Configurable Settings ---
 AUTH_ENABLED = os.environ.get("AUTH_ENABLED", "1") == "1"
 DEFAULT_MODELS_DIR = os.environ.get("DEFAULT_MODELS_DIR") or os.environ.get("MODELS_DIR")
 
 JWT_SECRET = os.environ.get("JWT_SECRET", "")
-JWT_ISSUER = os.environ.get("JWT_ISSUER", "vaultwares-pipelines")
+JWT_ISSUER = os.environ.get("JWT_ISSUER", "vault-server")
 JWT_AUDIENCE = os.environ.get("JWT_AUDIENCE", "vaultwares")
 JWT_TTL_SECONDS = int(os.environ.get("JWT_TTL_SECONDS", "900"))
 API_KEY_PEPPER = os.environ.get("API_KEY_PEPPER") or JWT_SECRET
@@ -152,10 +154,9 @@ def _get_client_ip(request: Request) -> Optional[str]:
     xff = request.headers.get("x-forwarded-for", "")
     if not xff:
         return peer_ip
-    # Use the rightmost IP, which is the one appended by our trusted proxy.
-    # Using the leftmost IP allows an attacker to spoof their IP by sending a fake X-Forwarded-For header.
-    last = xff.split(",")[-1].strip()
-    return last or peer_ip
+    # Use first hop (original client)
+    first = xff.split(",")[0].strip()
+    return first or peer_ip
 
 def _origin_allowed(origin: str) -> bool:
     if not origin:
@@ -287,14 +288,6 @@ async def gate_requests(request: Request, call_next):
     client_ip = _get_client_ip(request) or ""
     is_trusted_ip = _is_trusted_client_ip(client_ip)
 
-    if RATE_LIMIT_ENABLED and len(_rate_state) > RATE_STATE_MAX_KEYS:
-        now = time.time()
-        stale_keys = [k for k, v in _rate_state.items() if not v or (now - v[-1]) > RATE_LIMIT_WINDOW_SECONDS]
-        for k in stale_keys:
-            del _rate_state[k]
-        if len(_rate_state) > RATE_STATE_MAX_KEYS:
-            _rate_state.clear()
-
     if MAINTENANCE_MODE and not is_trusted_ip:
         raise HTTPException(status_code=503, detail="Temporarily unavailable")
 
@@ -423,6 +416,13 @@ class LoginResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int
+
+class PqcHandshakeRequest(BaseModel):
+    client_public_key: str
+
+class PqcHandshakeResponse(BaseModel):
+    server_cipher_text: str
+    algorithm: str = "ML-KEM-768"
 
 class MeResponse(BaseModel):
     username: str
@@ -682,6 +682,19 @@ async def shutdown_event():
 
 def db_available() -> bool:
     return bool(_tortoise_initialized and Tortoise._inited)
+
+@app.post("/security/pqc/handshake", response_model=PqcHandshakeResponse)
+async def pqc_handshake(payload: PqcHandshakeRequest):
+    """
+    Experimental PQC Handshake (ML-KEM).
+    """
+    try:
+        result = VaultMLKEM.encapsulate(payload.client_public_key)
+        return PqcHandshakeResponse(
+            server_cipher_text=result["cipher_text"]
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post("/auth/login", response_model=LoginResponse)
 async def login(payload: LoginRequest, request: Request):

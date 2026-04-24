@@ -23,6 +23,7 @@ app/generated-prisma-client/
 .env.*
 !.env.example
 .env.example
+.certs/
 .omx
 setup_startup_service.ps1
 start_dev_background.cmd
