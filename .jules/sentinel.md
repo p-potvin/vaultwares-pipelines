@@ -1,3 +1,8 @@
+## 2024-05-24 - Rate Limiting DOS & Localization
+
+**Vulnerability:** A DOS memory leak in API Server rate limiter (`gate_requests`) due to unchecked size of `_rate_state` dictionary.
+**Learning:** Limiting dictionary size in memory rate limiting controls by clearing the dictionary entirely opens a rate-limiting bypass. You should use a cache TTL mechanism or pop oldest items manually.
+**Prevention:** Always pop oldest elements from unbounded dictionaries instead of clearing them when adding a maximum size limit to rate-limit states.
 ## 2026-04-18 - API Key Bcrypt Hashing Migration
 **Vulnerability:** API Keys were hashed using simple SHA-256 with a pepper, and verified using direct database lookups.
 **Learning:** Bcrypt hashing relies on generating a unique random salt per hash. Thus, standard direct DB queries `hash == db.hash` do not work anymore. You must loop over active keys in the database and verify each one sequentially.
