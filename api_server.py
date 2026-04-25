@@ -149,6 +149,7 @@ def _get_client_ip(request: Request) -> Optional[str]:
 
     is_trusted_proxy = any(peer_obj in net for net in _trusted_proxy_networks)
     if not is_trusted_proxy:
+        # Client connected directly to server; ignore X-Forwarded-For completely
         return peer_ip
 
     xff = request.headers.get("x-forwarded-for", "")
