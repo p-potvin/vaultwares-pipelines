@@ -28,7 +28,7 @@ class ChatBot:
             ChatBot.tok = load_tokenizer(model_name)
 
             # Load the model with the specified configuration from the utility function.
-            ChatBot.m = load_model(model_name, torch.<compute_dtype>, '<quant_type>')
+            ChatBot.m = load_model(model_name, torch.bfloat16, '<quant_type>')
             
             # Load the PEFT model with the adapters from the utility function.
             ChatBot.m = load_peft_model(ChatBot.m, adapters_name)
