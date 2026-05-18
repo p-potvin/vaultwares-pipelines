@@ -8,7 +8,7 @@
 **Orchestrates multimodal AI pipelines (video, image, audio, LoRAs, digital twins, I2V/T2V, real-time filters) with local-first privacy guarantees.**
 
 ## Overview
-This repository powers the VaultWares AI backbone. It defines, runs, and monitors complex media transformation pipelines that feed into `vault-flows`, `vault-player`, `realtime-stt`, and other components.
+This repository powers the VaultWares AI backbone. It defines, runs, and monitors complex media transformation pipelines that feed into `vault-flows`, `vault-player`, `vaultwares-realtime`, and other components.
 
 All pipelines are designed local-first but support optional remote model endpoints.
 

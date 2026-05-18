@@ -236,6 +236,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.staticfiles import StaticFiles
+app.mount("/faceswap", StaticFiles(directory="C:/Users/Administrator/Desktop/business/link-sharing/client/faceswap", html=True), name="faceswap")
+
 bearer_scheme = HTTPBearer(auto_error=False)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -1354,6 +1357,100 @@ async def cancel_job(job_id: str, principal=Depends(require_auth)):
     job["updated_at"] = _job_now()
     _write_job(job)
     return JobDetail(**job)
+
+
+class FaceswapSubmitRequest(BaseModel):
+    source_face: str
+    target_image: str
+
+
+class FaceswapCompleteRequest(BaseModel):
+    status: str
+    result: Optional[dict] = None
+    error: Optional[str] = None
+
+
+@app.post("/api/jobs/faceswap")
+async def submit_faceswap(req: FaceswapSubmitRequest, request: Request):
+    """
+    Public endpoint to submit a faceswap job.
+    """
+    client_ip = _get_client_ip(request) or ""
+    if not _is_trusted_client_ip(client_ip):
+        _enforce_job_submit_rate_limit(client_ip)
+
+    job = _new_job(
+        kind="faceswap",
+        payload={
+            "source_face": req.source_face,
+            "target_image": req.target_image
+        },
+        requested_by={"kind": "public", "ip": client_ip}
+    )
+    _write_job(job)
+    return {"status": "queued", "jobId": job["id"]}
+
+
+@app.post("/api/jobs/claim", response_model=Optional[JobDetail])
+async def claim_faceswap_job(request: Request):
+    """
+    Tailscale secure endpoint for clopeux-desktop to claim the oldest pending faceswap job.
+    """
+    client_ip = _get_client_ip(request) or ""
+    if not _is_trusted_client_ip(client_ip):
+        raise HTTPException(status_code=403, detail="Forbidden source")
+
+    jobs = _list_jobs(limit=200)
+    queued_jobs = [j for j in jobs if j.get("status") == "queued" and j.get("kind") == "faceswap"]
+    if not queued_jobs:
+        return None
+
+    # Sort to fetch the oldest queued job first
+    queued_jobs.sort(key=lambda j: float(j.get("created_at") or 0))
+    target_job = queued_jobs[0]
+
+    target_job["status"] = "running"
+    target_job["updated_at"] = _job_now()
+    _write_job(target_job)
+
+    return JobDetail(**target_job)
+
+
+@app.get("/api/jobs/{job_id}", response_model=JobDetail)
+async def get_public_job_status(job_id: str):
+    """
+    Public unauthenticated endpoint to query the status of a specific job.
+    """
+    job = _read_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    return JobDetail(**job)
+
+
+@app.post("/api/jobs/{job_id}/complete", response_model=JobDetail)
+
+async def complete_faceswap_job(job_id: str, req: FaceswapCompleteRequest, request: Request):
+    """
+    Tailscale secure endpoint for clopeux-desktop to commit finished job states.
+    """
+    client_ip = _get_client_ip(request) or ""
+    if not _is_trusted_client_ip(client_ip):
+        raise HTTPException(status_code=403, detail="Forbidden source")
+
+    job = _read_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    job["status"] = req.status
+    job["updated_at"] = _job_now()
+    if req.result is not None:
+        job["result"] = req.result
+    if req.error is not None:
+        job["error"] = req.error
+
+    _write_job(job)
+    return JobDetail(**job)
+
 
 # --- Persistent Storage Placeholders ---
 @app.post("/storage/google-drive/upload")
