@@ -231,13 +231,9 @@ def _download_and_zip_images_worker(url_slug, page_url, img_info_list, batch_siz
     zip_writer = None
     zip_path = None
     count = 0
-    upscaler = None
-    if upscale_enabled:
-        try:
-            from app.services.upscaler import get_upscaler
-            upscaler = get_upscaler()
-            if not upscaler.is_available(): upscale_enabled = False
-        except: upscale_enabled = False
+    # This API runs on a CPU-only VPS. Keep the request shape for compatibility,
+    # but do not import or initialize the GPU-oriented Torch/Spandrel upscaler.
+    upscale_enabled = False
 
     for img_url, file_corr in img_info_list:
         if zipper_cancel_event.is_set():
@@ -260,12 +256,6 @@ def _download_and_zip_images_worker(url_slug, page_url, img_info_list, batch_siz
 
         write_content = content
         out_ext = ext
-        if upscale_enabled and upscaler and ext in ['jpg', 'jpeg', 'png', 'webp']:
-            try:
-                write_content = upscaler.upscale_image(content, model_name=upscale_model)
-                out_ext = 'png'
-            except: pass
-
         filename_in_zip = f"{url_slug}_{str(count + 1).zfill(3)}.{out_ext}"
         try:
             zip_writer.writestr(filename_in_zip, write_content)
@@ -311,12 +301,12 @@ def api_get_jobs():
 
 @router.get("/api/upscaler/status")
 def api_upscaler_status():
-    try:
-        from app.services.upscaler import get_upscaler
-        upscaler = get_upscaler()
-        return {"available": upscaler.is_available(), "device": upscaler.device, "models": upscaler.get_available_models(), "stats": upscaler.get_stats()}
-    except Exception as e:
-        return {"available": False, "error": str(e)}
+    return {
+        "available": False,
+        "reason": "disabled_on_cpu_only_vps",
+        "models": [],
+        "stats": {},
+    }
 
 @router.post("/api/open-downloaded")
 def api_open_downloaded(payload: OpenPayload):
