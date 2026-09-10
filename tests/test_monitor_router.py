@@ -435,3 +435,5 @@ def test_monitor_resources_exposes_bounded_host_rollups(monkeypatch, tmp_path):
     assert len(ovh["minute_history"]) == 1
     greencloud = next(host for host in body["hosts"] if host["id"] == "greencloud-vps")
     assert greencloud["status"] == "missing"
+    clopeux = next(host for host in body["hosts"] if host["id"] == "clopeux-desktop")
+    assert clopeux["status"] == "missing"
