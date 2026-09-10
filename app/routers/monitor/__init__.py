@@ -304,7 +304,7 @@ def get_host_resources() -> Dict[str, Any]:
     """
     locations_root = _health_root() / "data" / "rollups" / "locations"
     hosts: List[Dict[str, Any]] = []
-    for location_id in ("vps-ovhcloud", "greencloud-vps"):
+    for location_id in ("vps-ovhcloud", "greencloud-vps", "clopeux-desktop"):
         rollup = _read_json(locations_root / f"{location_id}.json", {}) or {}
         resources = rollup.get("resources") if isinstance(rollup.get("resources"), dict) else {}
         latest = resources.get("latest") if isinstance(resources.get("latest"), dict) else None
