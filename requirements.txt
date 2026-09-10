@@ -2,15 +2,9 @@
 # vaultwares-api - core runtime dependencies
 # ============================================================
 
-# ---- multi-modal model (SmolVLM2) ----
-transformers>=5.14.1
-torch>=2.13.0
-accelerate>=0.26.0
-
 # ---- image processing ----
 Pillow>=12.3.0
 numpy>=1.24.0
-spandrel>=0.4.1
 
 # ---- 3D processing ----
 open3d>=0.18.0
@@ -55,4 +49,3 @@ pydantic
 
 rembg>=2.0.50
 webauthn
-
