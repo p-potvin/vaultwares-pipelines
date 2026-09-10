@@ -296,6 +296,39 @@ def get_health_ledger() -> Dict[str, Any]:
     }
 
 
+def get_host_resources() -> Dict[str, Any]:
+    """Return bounded host resource telemetry from signed Health Ledger rollups.
+
+    Probe hosts collect locally; this browser-facing API only reads the latest
+    signed location rollups and never shells out or exposes raw host logs.
+    """
+    locations_root = _health_root() / "data" / "rollups" / "locations"
+    hosts: List[Dict[str, Any]] = []
+    for location_id in ("vps-ovhcloud", "greencloud-vps"):
+        rollup = _read_json(locations_root / f"{location_id}.json", {}) or {}
+        resources = rollup.get("resources") if isinstance(rollup.get("resources"), dict) else {}
+        latest = resources.get("latest") if isinstance(resources.get("latest"), dict) else None
+        hosts.append(
+            _sanitize(
+                {
+                    "id": location_id,
+                    "label": rollup.get("probe_location") or location_id,
+                    "generated_at": rollup.get("generated_at"),
+                    "status": "ok" if latest else "missing",
+                    "latest": latest,
+                    "minute_history": resources.get("minute_history") if isinstance(resources.get("minute_history"), list) else [],
+                    "daily_history": resources.get("daily_history") if isinstance(resources.get("daily_history"), list) else [],
+                }
+            )
+        )
+    return {
+        "source": "health-ledger",
+        "generated_at": _utc_now(),
+        "refresh_seconds": 60,
+        "hosts": hosts,
+    }
+
+
 def _load_health_inventory() -> List[Dict[str, Any]]:
     path = _health_root() / "services.yaml"
     try:
@@ -864,6 +897,11 @@ def deploys(
 @router.get("/health-ledger")
 def health_ledger() -> Dict[str, Any]:
     return get_health_ledger()
+
+
+@router.get("/resources")
+def resources() -> Dict[str, Any]:
+    return get_host_resources()
 
 
 @router.get("/services")

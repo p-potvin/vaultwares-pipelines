@@ -410,3 +410,28 @@ def test_monitor_accepts_only_signed_location_rollups(monkeypatch, tmp_path):
         (health_root / "data" / "rollups" / "locations" / "greencloud-vps.json").read_text()
     )
     assert stored["probe_location_id"] == "greencloud-vps"
+
+
+def test_monitor_resources_exposes_bounded_host_rollups(monkeypatch, tmp_path):
+    client, health_root, _ = _client(monkeypatch, tmp_path)
+    _write_json(
+        health_root / "data" / "rollups" / "locations" / "vps-ovhcloud.json",
+        {
+            "probe_location": "OVHCloud",
+            "generated_at": "2026-09-09T12:00:00Z",
+            "resources": {
+                "latest": {"timestamp": "2026-09-09T12:00:00Z", "disks": [{"target": "/", "used_percent": 41}]},
+                "minute_history": [{"timestamp": "2026-09-09T11:59:00Z", "disks": [{"target": "/", "used_percent": 40}]}],
+                "daily_history": [{"timestamp": "2026-09-08T12:00:00Z", "disks": [{"target": "/", "used_percent": 39}]}],
+            },
+        },
+    )
+    response = client.get("/monitor/resources")
+    assert response.status_code == 200
+    body = response.json()
+    ovh = next(host for host in body["hosts"] if host["id"] == "vps-ovhcloud")
+    assert ovh["status"] == "ok"
+    assert ovh["latest"]["disks"][0]["used_percent"] == 41
+    assert len(ovh["minute_history"]) == 1
+    greencloud = next(host for host in body["hosts"] if host["id"] == "greencloud-vps")
+    assert greencloud["status"] == "missing"
